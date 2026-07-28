@@ -2,8 +2,10 @@ import { motion } from 'framer-motion';
 import { FiArchive, FiUsers, FiClock } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { archivedChats } from '../../data/mockData';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function ArchivedPage() {
+  usePageTitle('Archived — Nexa');
   if (archivedChats.length === 0) {
     return (
       <DashboardSubLayout title="Archived Chats" subtitle="Conversations you've archived">

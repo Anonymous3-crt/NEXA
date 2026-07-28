@@ -1,3 +1,4 @@
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMessageCircle, FiHeart, FiZap, FiShield, FiGlobe, FiArrowRight } from 'react-icons/fi';
@@ -12,6 +13,7 @@ const values = [
 ];
 
 export default function AboutPage() {
+  usePageTitle('About — Nexa');
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
       <Navbar />

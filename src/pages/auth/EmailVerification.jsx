@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import { FiMail, FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
 import AuthLayout from '../../components/auth/AuthLayout';
 import { useToast } from '../../components/ui/Toast';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function EmailVerification() {
+  usePageTitle('Verify Email — Nexa');
   const navigate = useNavigate();
   const toast = useToast();
   const [code, setCode] = useState(['', '', '', '', '', '']);

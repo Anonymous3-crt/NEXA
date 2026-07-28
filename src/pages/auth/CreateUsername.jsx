@@ -5,10 +5,12 @@ import { FiAtSign, FiCheck, FiX } from 'react-icons/fi';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const takenUsernames = ['admin', 'nexa', 'test', 'user', 'root'];
 
 export default function CreateUsername() {
+  usePageTitle('Create Username — Nexa');
   const navigate = useNavigate();
   const toast = useToast();
   const [username, setUsername] = useState('');

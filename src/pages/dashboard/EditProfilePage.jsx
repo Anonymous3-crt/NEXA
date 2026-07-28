@@ -6,8 +6,10 @@ import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function EditProfilePage() {
+  usePageTitle('Edit Profile — Nexa');
   const navigate = useNavigate();
   const toast = useToast();
   const { currentUser } = useDashboard();

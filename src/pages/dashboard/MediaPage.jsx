@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { FiImage, FiSearch } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { mediaItems } from '../../data/mockData';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const mediaTypes = ['all', 'image', 'document', 'video'];
 
 export default function MediaPage() {
+  usePageTitle('Media — Nexa');
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? mediaItems : mediaItems.filter((m) => m.type === filter);
 

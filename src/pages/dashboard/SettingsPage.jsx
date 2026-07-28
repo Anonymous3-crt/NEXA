@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { FiMoon, FiSun, FiVolume2, FiGlobe, FiMonitor, FiShield, FiUsers, FiLock, FiEye, FiDownload } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function SettingsPage() {
+  usePageTitle('Settings — Nexa');
   const { theme, toggleTheme } = useDashboard();
   const [activeTab, setActiveTab] = useState('general');
 

@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { FiUsers, FiSearch, FiUserPlus, FiMail, FiMessageCircle } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { contacts } from '../../data/mockData';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function ContactsPage() {
+  usePageTitle('Contacts — Nexa');
   const [search, setSearch] = useState('');
   const filtered = contacts.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
 

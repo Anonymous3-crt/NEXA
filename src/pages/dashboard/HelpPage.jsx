@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { FiHelpCircle, FiSearch, FiChevronRight, FiExternalLink } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { helpArticles, helpCategories } from '../../data/mockData';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function HelpPage() {
+  usePageTitle('Help Center — Nexa');
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState(null);
 

@@ -6,8 +6,10 @@ import { FcGoogle } from 'react-icons/fc';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function Login() {
+  usePageTitle('Sign In — Nexa');
   const navigate = useNavigate();
   const toast = useToast();
   const [loading, setLoading] = useState(false);

@@ -2,8 +2,10 @@ import { motion } from 'framer-motion';
 import { FiStar, FiMessageSquare } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { starredMessages } from '../../data/mockData';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function StarredPage() {
+  usePageTitle('Starred — Nexa');
   if (starredMessages.length === 0) {
     return (
       <DashboardSubLayout title="Starred Messages" subtitle="Your bookmarked messages">

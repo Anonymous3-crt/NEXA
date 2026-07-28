@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { FiPhone, FiPhoneIncoming, FiPhoneOutgoing, FiPhoneMissed, FiVideo } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { callLogs } from '../../data/mockData';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const iconMap = {
   incoming: FiPhoneIncoming,
@@ -22,6 +23,7 @@ const labelMap = {
 };
 
 export default function CallsPage() {
+  usePageTitle('Calls — Nexa');
   if (callLogs.length === 0) {
     return (
       <DashboardSubLayout title="Calls" subtitle="Your call history">

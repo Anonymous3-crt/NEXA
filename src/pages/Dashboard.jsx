@@ -1,3 +1,4 @@
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMenu, FiMessageCircle, FiBell, FiSettings, FiUser } from 'react-icons/fi';
@@ -78,6 +79,7 @@ function DashboardInner() {
 }
 
 export default function Dashboard() {
+  usePageTitle('Messages — Nexa');
   return (
     <DashboardProvider>
       <motion.div

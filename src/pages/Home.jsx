@@ -1,3 +1,4 @@
+import { usePageTitle } from '../hooks/usePageTitle';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import TrustedBy from '../components/TrustedBy';
@@ -11,6 +12,7 @@ import CTA from '../components/CTA';
 import Footer from '../components/Footer';
 
 export default function Home() {
+  usePageTitle('Nexa — Premium AI Chat');
   return (
     <main>
       <Navbar />

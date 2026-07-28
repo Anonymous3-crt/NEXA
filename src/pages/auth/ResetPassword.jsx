@@ -5,8 +5,10 @@ import { FiLock, FiArrowLeft } from 'react-icons/fi';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function ResetPassword() {
+  usePageTitle('Reset Password — Nexa');
   const navigate = useNavigate();
   const toast = useToast();
   const [loading, setLoading] = useState(false);

@@ -1,8 +1,10 @@
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMessageCircle, FiArrowLeft, FiHome } from 'react-icons/fi';
 
 export default function NotFoundPage() {
+  usePageTitle('404: Page Not Found — Nexa');
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">

@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { FiCheck, FiFilter } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { notifications } from '../../data/mockData';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function NotificationsPage() {
+  usePageTitle('Notifications — Nexa');
   const [filter, setFilter] = useState('all');
   const [items, setItems] = useState(notifications);
   const filters = ['all', 'unread', 'mentions', 'system'];

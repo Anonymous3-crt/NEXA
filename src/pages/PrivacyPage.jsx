@@ -1,3 +1,4 @@
+import { usePageTitle } from '../hooks/usePageTitle';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -14,6 +15,7 @@ const sections = [
 ];
 
 export default function PrivacyPage() {
+  usePageTitle('Privacy Policy — Nexa');
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
       <Navbar />
