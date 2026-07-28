@@ -35,7 +35,7 @@ const pageVariants = {
 
 function AnimatedPage({ children }) {
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+    <motion.div id="main-content" tabIndex={-1} variants={pageVariants} initial="initial" animate="animate" exit="exit">
       {children}
     </motion.div>
   );
@@ -82,9 +82,21 @@ function AppRoutes() {
   );
 }
 
-export default function App() {
+export default function SkipLink() {
+  return (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-xl focus:gradient-bg focus:text-white focus:text-sm focus:font-medium focus:shadow-xl"
+    >
+      Skip to main content
+    </a>
+  );
+}
+
+function App() {
   return (
     <BrowserRouter>
+      <SkipLink />
       <ToastProvider>
         <ScrollToTop />
         <AppRoutes />

@@ -36,7 +36,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={addToast}>
       {children}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+      <div role="status" aria-live="polite" aria-label="Notifications" className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
         <AnimatePresence mode="popLayout">
           {toasts.map((toast) => {
             const Icon = icons[toast.type];

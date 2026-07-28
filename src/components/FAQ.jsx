@@ -41,6 +41,7 @@ export default function FAQ() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
+              whileHover={{ y: -2 }}
               className={`glass rounded-2xl overflow-hidden transition-all duration-300 hover:bg-white/[0.06] ${
                 openIndex === i ? 'border-indigo-500/20' : ''
               }`}

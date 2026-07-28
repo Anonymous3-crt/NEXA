@@ -27,6 +27,7 @@ export default function StarredPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
+            whileHover={{ y: -3 }}
             className="glass rounded-2xl p-4 transition-all duration-300 hover:bg-white/[0.06] cursor-pointer"
           >
             <div className="flex items-start gap-3">

@@ -27,6 +27,7 @@ export default function ArchivedPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
+            whileHover={{ y: -3 }}
             className="glass rounded-2xl p-4 transition-all duration-300 hover:bg-white/[0.06] cursor-pointer"
           >
             <div className="flex items-center gap-3">
@@ -48,9 +49,9 @@ export default function ArchivedPage() {
                   </span>
                 </div>
               </div>
-              <button className="px-3 py-1.5 rounded-lg glass text-xs text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
+              <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="px-3 py-1.5 rounded-lg glass text-xs text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
                 Unarchive
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         ))}

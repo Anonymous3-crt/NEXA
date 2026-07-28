@@ -16,24 +16,26 @@ export default function NotificationsPage() {
       title="Notifications"
       subtitle="Stay updated with your activity"
       action={
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-sm text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
+        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-sm text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
           <FiFilter size={14} />
           Filter
-        </button>
+        </motion.button>
       }
     >
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex gap-2">
           {filters.map((f) => (
-            <button
+            <motion.button
               key={f}
               onClick={() => setFilter(f)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               className={`px-4 py-1.5 rounded-xl text-xs font-medium capitalize transition-all ${
                 filter === f ? 'bg-indigo-500/20 text-indigo-400' : 'glass text-zinc-400 hover:text-white'
               }`}
             >
               {f}
-            </button>
+            </motion.button>
           ))}
         </div>
 
@@ -59,9 +61,9 @@ export default function NotificationsPage() {
                   <p className="text-xs text-zinc-400 mt-1">{n.desc}</p>
                 </div>
                 {!n.read && (
-                  <button onClick={() => markRead(n.id)} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all">
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => markRead(n.id)} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all">
                     <FiCheck size={14} />
-                  </button>
+                  </motion.button>
                 )}
               </div>
             </motion.div>

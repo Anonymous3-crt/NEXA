@@ -41,10 +41,10 @@ export default function CallsPage() {
       title="Calls"
       subtitle="Call history"
       action={
-        <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
+        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
           <FiPhone size={14} />
           New Call
-        </button>
+        </motion.button>
       }
     >
       <div className="max-w-3xl mx-auto space-y-2">
@@ -56,6 +56,7 @@ export default function CallsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
+              whileHover={{ y: -3 }}
               className="glass rounded-2xl p-4 transition-all duration-300 hover:bg-white/[0.06] cursor-pointer"
             >
               <div className="flex items-center gap-3">

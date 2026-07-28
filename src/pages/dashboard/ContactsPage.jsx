@@ -13,10 +13,10 @@ export default function ContactsPage() {
       title="Contacts"
       subtitle={`${contacts.length} contacts`}
       action={
-        <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
+        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
           <FiUserPlus size={14} />
           Add Contact
-        </button>
+        </motion.button>
       }
     >
       <div className="max-w-4xl mx-auto space-y-6">

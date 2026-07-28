@@ -33,7 +33,8 @@ export default function TermsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="glass rounded-2xl p-6"
+                whileHover={{ y: -3, scale: 1.01 }}
+                className="glass rounded-2xl p-6 transition-all duration-300 glow-card"
               >
                 <h2 className="text-lg font-semibold text-white mb-3">{section.title}</h2>
                 <p className="text-sm text-zinc-400 leading-relaxed">{section.content}</p>

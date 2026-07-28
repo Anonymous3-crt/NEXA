@@ -49,7 +49,8 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="glass rounded-2xl p-6 text-center hover:bg-white/[0.06] transition-all"
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  className="glass rounded-2xl p-6 text-center transition-all duration-300 glow-card"
                 >
                   <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center mx-auto mb-4">
                     <Icon className="text-white text-lg" />

@@ -29,15 +29,17 @@ export default function MediaPage() {
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex gap-2">
           {mediaTypes.map((t) => (
-            <button
+            <motion.button
               key={t}
               onClick={() => setFilter(t)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               className={`px-4 py-1.5 rounded-xl text-xs font-medium capitalize transition-all ${
                 filter === t ? 'bg-indigo-500/20 text-indigo-400' : 'glass text-zinc-400 hover:text-white'
               }`}
             >
               {t}
-            </button>
+            </motion.button>
           ))}
         </div>
 

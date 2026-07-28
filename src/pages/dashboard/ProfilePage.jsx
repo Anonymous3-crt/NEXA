@@ -40,10 +40,14 @@ export default function ProfilePage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
             {stats.map((s) => (
-              <div key={s.label} className="glass rounded-2xl p-4 text-center">
+              <motion.div
+                key={s.label}
+                whileHover={{ y: -3, scale: 1.02 }}
+                className="glass rounded-2xl p-4 text-center transition-all duration-300 cursor-default"
+              >
                 <div className="text-xl font-bold gradient-text">{s.value}</div>
                 <div className="text-xs text-zinc-500 mt-1">{s.label}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
@@ -57,13 +61,17 @@ export default function ProfilePage() {
                 { icon: FiClock, label: 'Local Time', value: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
                 { icon: FiCalendar, label: 'Member Since', value: 'January 2025' },
               ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03]">
+                <motion.div
+                  key={label}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] transition-colors cursor-default"
+                >
                   <Icon className="text-indigo-400 text-sm shrink-0" />
                   <div>
                     <div className="text-[10px] text-zinc-600">{label}</div>
                     <div className="text-sm text-zinc-300">{value}</div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -77,10 +85,14 @@ export default function ProfilePage() {
                 { label: 'Push notifications', status: 'Disabled', color: 'text-zinc-500' },
                 { label: 'End-to-end encryption', status: 'Active', color: 'text-emerald-400' },
               ].map(({ label, status, color }) => (
-                <div key={label} className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.03]">
+                <motion.div
+                  key={label}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.03] transition-colors cursor-default"
+                >
                   <span className="text-sm text-zinc-300">{label}</span>
                   <span className={`text-xs ${color}`}>{status}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>

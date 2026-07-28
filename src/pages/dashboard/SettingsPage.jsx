@@ -50,15 +50,17 @@ export default function SettingsPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex gap-1 p-1 glass rounded-2xl w-fit">
           {tabs.map((tab) => (
-            <button
+            <motion.button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.id ? 'bg-indigo-500/20 text-indigo-400 shadow-sm' : 'text-zinc-400 hover:text-white'
               }`}
             >
               {tab.label}
-            </button>
+            </motion.button>
           ))}
         </div>
 
@@ -80,9 +82,16 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {item.toggle !== undefined && (
-                      <div className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${item.enabled ? 'bg-indigo-500/40' : 'bg-zinc-700'}`}>
-                        <div className={`w-4 h-4 rounded-full absolute top-0.5 shadow transition-all ${item.enabled ? 'bg-indigo-400 right-0.5' : 'bg-zinc-500 left-0.5'}`} />
-                      </div>
+                      <motion.div
+                        whileTap={{ scale: 0.9 }}
+                        className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${item.enabled ? 'bg-indigo-500/40' : 'bg-zinc-700'}`}
+                      >
+                        <motion.div
+                          layout
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                          className={`w-4 h-4 rounded-full absolute top-0.5 shadow ${item.enabled ? 'bg-indigo-400 right-0.5' : 'bg-zinc-500 left-0.5'}`}
+                        />
+                      </motion.div>
                     )}
                     {item.value && <span className="text-xs text-zinc-500">{item.value}</span>}
                     {item.action}
@@ -93,14 +102,14 @@ export default function SettingsPage() {
           </div>
         </motion.div>
 
-        <div className="flex justify-end gap-3 pt-2">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex justify-end gap-3 pt-2">
           <button className="px-5 py-2.5 rounded-xl glass text-sm text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
             Reset to Defaults
           </button>
-          <button className="px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
+          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
             Save Settings
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </DashboardSubLayout>
   );

@@ -29,20 +29,24 @@ export default function HelpPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button
+          <motion.button
             onClick={() => setActiveCategory(null)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             className={`px-4 py-1.5 rounded-xl text-xs font-medium transition-all ${!activeCategory ? 'bg-indigo-500/20 text-indigo-400' : 'glass text-zinc-400 hover:text-white'}`}
           >
             All
-          </button>
+          </motion.button>
           {helpCategories.map((cat) => (
-            <button
+            <motion.button
               key={cat}
               onClick={() => setActiveCategory(cat)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               className={`px-4 py-1.5 rounded-xl text-xs font-medium transition-all ${activeCategory === cat ? 'bg-indigo-500/20 text-indigo-400' : 'glass text-zinc-400 hover:text-white'}`}
             >
               {cat}
-            </button>
+            </motion.button>
           ))}
         </div>
 
