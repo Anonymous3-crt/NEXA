@@ -1,18 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiImage, FiSearch } from 'react-icons/fi';
+import { FiImage } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
-import { mediaItems } from '../../data/mockData';
+import { api } from '../../api';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 const mediaTypes = ['all', 'image', 'document', 'video'];
 
 export default function MediaPage() {
   usePageTitle('Media — Nexa');
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.media.list().then(d => setItems(d.media || [])).catch(() => {}).finally(() => setLoading(false)); }, []);
   const [filter, setFilter] = useState('all');
-  const filtered = filter === 'all' ? mediaItems : mediaItems.filter((m) => m.type === filter);
+  const filtered = filter === 'all' ? items : items.filter((m) => m.type === filter);
 
-  if (mediaItems.length === 0) {
+  if (loading) return null;
+  if (items.length === 0) {
     return (
       <DashboardSubLayout title="Media Gallery" subtitle="Files shared in conversations">
         <div className="flex flex-col items-center justify-center h-80 text-center">
@@ -27,7 +31,7 @@ export default function MediaPage() {
   }
 
   return (
-    <DashboardSubLayout title="Media Gallery" subtitle={`${mediaItems.length} files shared`}>
+    <DashboardSubLayout title="Media Gallery" subtitle={`${items.length} files shared`}>
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex gap-2">
           {mediaTypes.map((t) => (
@@ -60,7 +64,7 @@ export default function MediaPage() {
                 <p className="text-xs text-white truncate">{item.name}</p>
                 <div className="flex items-center justify-between mt-1.5">
                   <span className="text-[10px] text-zinc-600">{item.size}</span>
-                  <span className="text-[10px] text-zinc-600">{item.time}</span>
+                  <span className="text-[10px] text-zinc-600">{item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</span>
                 </div>
               </div>
             </motion.div>

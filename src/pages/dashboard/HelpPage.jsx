@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiHelpCircle, FiSearch, FiChevronRight, FiExternalLink } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
-import { helpArticles, helpCategories } from '../../data/mockData';
+import { api } from '../../api';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function HelpPage() {
   usePageTitle('Help Center — Nexa');
+  const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState(null);
 
-  const filtered = helpArticles.filter(
+  useEffect(() => {
+    api.help.list().then(d => {
+      setArticles(d.articles || []);
+      setCategories(d.categories || []);
+    }).catch(() => {});
+  }, []);
+
+  const filtered = articles.filter(
     (a) =>
       a.title.toLowerCase().includes(search.toLowerCase()) &&
       (!activeCategory || a.category === activeCategory)
@@ -39,7 +48,7 @@ export default function HelpPage() {
           >
             All
           </motion.button>
-          {helpCategories.map((cat) => (
+          {categories.map((cat) => (
             <motion.button
               key={cat}
               onClick={() => setActiveCategory(cat)}
@@ -73,10 +82,10 @@ export default function HelpPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs text-indigo-400 font-medium">{article.category}</span>
-                      <span className="text-[10px] text-zinc-600">{article.readTime}</span>
+                      <span className="text-[10px] text-zinc-600">{article.read_time}</span>
                     </div>
                     <h3 className="text-sm font-semibold text-white mt-1">{article.title}</h3>
-                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{article.desc}</p>
+                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{article.description}</p>
                     <div className="flex items-center gap-1 mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
                       Read article <FiChevronRight size={12} />
                     </div>

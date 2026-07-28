@@ -96,8 +96,8 @@ export default function Navbar() {
                 Log in
               </Link>
               <Link
-                to="/login"
-                className="relative overflow-hidden group px-5 py-2.5 text-sm font-semibold text-white rounded-xl gradient-bg glow-indigo transition-all duration-300 hover:scale-105 hover:shadow-xl inline-flex items-center gap-2"
+                to="/signup"
+                className="group relative px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-semibold shadow-lg glow-indigo flex items-center gap-2 transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95"
               >
                 Get Started
                 <FiArrowRight className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
@@ -166,7 +166,7 @@ export default function Navbar() {
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/[0.06] space-y-2">
                 <Link
-                  to="/login"
+                  to="/signup"
                   onClick={() => setMobileOpen(false)}
                   className="block w-full px-4 py-3 text-sm font-semibold text-center text-white rounded-xl gradient-bg"
                 >

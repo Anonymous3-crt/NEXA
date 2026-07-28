@@ -76,7 +76,7 @@ export default function CTA() {
                 ))}
               </ul>
               <Link
-                to="/login"
+                to="/signup"
                 className={`block w-full py-3.5 rounded-2xl text-sm font-semibold text-center transition-all duration-300 ${
                   plan.featured
                     ? 'bg-white text-indigo-600 hover:bg-white/90 hover:shadow-xl'

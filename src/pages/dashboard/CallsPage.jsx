@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiPhone, FiPhoneIncoming, FiPhoneOutgoing, FiPhoneMissed, FiVideo } from 'react-icons/fi';
+import { FiPhone, FiPhoneIncoming, FiPhoneOutgoing, FiVideo } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
-import { callLogs } from '../../data/mockData';
+import { api } from '../../api';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 const iconMap = {
@@ -24,7 +25,11 @@ const labelMap = {
 
 export default function CallsPage() {
   usePageTitle('Calls — Nexa');
-  if (callLogs.length === 0) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.calls.list().then(d => setItems(d.calls || [])).catch(() => {}).finally(() => setLoading(false)); }, []);
+  if (loading) return null;
+  if (items.length === 0) {
     return (
       <DashboardSubLayout title="Calls" subtitle="Your call history">
         <div className="flex flex-col items-center justify-center h-80 text-center">
@@ -50,7 +55,7 @@ export default function CallsPage() {
       }
     >
       <div className="max-w-3xl mx-auto space-y-2">
-        {callLogs.map((call, i) => {
+        {items.map((call, i) => {
           const Icon = iconMap[call.type] || FiPhone;
           return (
             <motion.div
@@ -69,18 +74,18 @@ export default function CallsPage() {
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-white">{call.name}</span>
-                      {call.group && <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-[9px] text-indigo-400">Group</span>}
-                      {call.ai && <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-[9px] text-emerald-400">AI</span>}
+                      {call.group_call ? <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-[9px] text-indigo-400">Group</span> : null}
+                      {call.ai_call ? <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-[9px] text-emerald-400">AI</span> : null}
                     </div>
-                    <span className="text-[10px] text-zinc-600">{call.time}</span>
+                    <span className="text-[10px] text-zinc-600">{call.created_at ? new Date(call.created_at).toLocaleDateString() : ''}</span>
                   </div>
                   <div className="flex items-center gap-3 mt-1">
                     <div className={`flex items-center gap-1 text-xs ${call.missed ? 'text-red-400' : colorMap[call.type] || 'text-zinc-400'}`}>
                       <Icon size={12} />
                       <span>{labelMap[call.type] || 'Call'}</span>
                     </div>
-                    {call.duration && <span className="text-xs text-zinc-600">{call.duration}</span>}
-                    {call.missed && <span className="text-xs text-red-400 font-medium">Missed</span>}
+                    {call.duration ? <span className="text-xs text-zinc-600">{call.duration}</span> : null}
+                    {call.missed ? <span className="text-xs text-red-400 font-medium">Missed</span> : null}
                   </div>
                 </div>
                 <div className="flex gap-2">

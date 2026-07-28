@@ -1,12 +1,17 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiArchive, FiUsers, FiClock } from 'react-icons/fi';
+import { FiArchive, FiUsers } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
-import { archivedChats } from '../../data/mockData';
+import { api } from '../../api';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function ArchivedPage() {
   usePageTitle('Archived — Nexa');
-  if (archivedChats.length === 0) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.archived.list().then(d => setItems(d.archived || [])).catch(() => {}).finally(() => setLoading(false)); }, []);
+  if (loading) return null;
+  if (items.length === 0) {
     return (
       <DashboardSubLayout title="Archived Chats" subtitle="Conversations you've archived">
         <div className="flex flex-col items-center justify-center h-80 text-center">
@@ -21,9 +26,9 @@ export default function ArchivedPage() {
   }
 
   return (
-    <DashboardSubLayout title="Archived Chats" subtitle={`${archivedChats.length} archived conversations`}>
+    <DashboardSubLayout title="Archived Chats" subtitle={`${items.length} archived conversations`}>
       <div className="max-w-3xl mx-auto space-y-2">
-        {archivedChats.map((chat, i) => (
+        {items.map((chat, i) => (
           <motion.div
             key={chat.id}
             initial={{ opacity: 0, y: 10 }}
@@ -39,12 +44,12 @@ export default function ArchivedPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-white">{chat.name}</span>
-                  <span className="text-[10px] text-zinc-600 shrink-0">{chat.time}</span>
+                  <span className="text-[10px] text-zinc-600 shrink-0">{chat.created_at ? new Date(chat.created_at).toLocaleDateString() : ''}</span>
                 </div>
-                <p className="text-xs text-zinc-400 mt-0.5 truncate">{chat.lastMessage}</p>
+                <p className="text-xs text-zinc-400 mt-0.5 truncate">{chat.last_message}</p>
                 <div className="flex items-center gap-3 mt-1.5">
                   <span className="flex items-center gap-1 text-[10px] text-zinc-600">
-                    <FiUsers size={10} /> {chat.members} members
+                    <FiUsers size={10} /> {chat.member_count} members
                   </span>
                   <span className="flex items-center gap-1 text-[10px] text-zinc-600">
                     <FiArchive size={10} /> Archived

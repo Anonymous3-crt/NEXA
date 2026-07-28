@@ -82,7 +82,7 @@ function AppRoutes() {
   );
 }
 
-export default function SkipLink() {
+function SkipLink() {
   return (
     <a
       href="#main-content"
@@ -93,7 +93,7 @@ export default function SkipLink() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <SkipLink />

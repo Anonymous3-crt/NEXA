@@ -3,12 +3,11 @@ import { motion } from 'framer-motion';
 import { FiEdit2, FiMail, FiClock, FiCalendar, FiCamera, FiCheck, FiX } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { useDashboard } from '../../contexts/DashboardContext';
-import { contacts } from '../../data/mockData';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function ProfilePage() {
   usePageTitle('Profile — Nexa');
-  const { currentUser } = useDashboard();
+  const { currentUser, contacts } = useDashboard();
   const stats = [
     { label: 'Messages', value: '2,847' },
     { label: 'Contacts', value: contacts.length },

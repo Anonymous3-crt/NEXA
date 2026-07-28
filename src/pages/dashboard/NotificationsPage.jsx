@@ -2,16 +2,14 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiCheck, FiFilter } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
-import { notifications } from '../../data/mockData';
+import { useDashboard } from '../../contexts/DashboardContext';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function NotificationsPage() {
   usePageTitle('Notifications — Nexa');
+  const { notifications, markNotifRead } = useDashboard();
   const [filter, setFilter] = useState('all');
-  const [items, setItems] = useState(notifications);
   const filters = ['all', 'unread', 'mentions', 'system'];
-
-  const markRead = (id) => setItems((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
 
   return (
     <DashboardSubLayout
@@ -42,7 +40,7 @@ export default function NotificationsPage() {
         </div>
 
         <motion.div layout className="space-y-2">
-          {items.map((n, i) => (
+          {filtered.map((n, i) => (
             <motion.div
               key={n.id}
               layout
@@ -58,12 +56,12 @@ export default function NotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium text-white">{n.title}</span>
-                    <span className="text-[10px] text-zinc-600 shrink-0">{n.time}</span>
+                    <span className="text-[10px] text-zinc-600 shrink-0">{n.created_at ? new Date(n.created_at).toLocaleDateString() : ''}</span>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-1">{n.desc}</p>
+                  <p className="text-xs text-zinc-400 mt-1">{n.description || n.desc}</p>
                 </div>
                 {!n.read && (
-                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => markRead(n.id)} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all">
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => markNotifRead(n.id)} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all">
                     <FiCheck size={14} />
                   </motion.button>
                 )}

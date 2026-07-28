@@ -6,6 +6,7 @@ import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { api } from '../../api';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function EditProfilePage() {
@@ -16,17 +17,25 @@ export default function EditProfilePage() {
   const [form, setForm] = useState({
     name: currentUser.name,
     email: currentUser.email,
-    bio: 'Building the future of communication at Nexa.',
-    company: 'Nexa Inc.',
-    location: 'San Francisco, CA',
-    website: 'nexa.app',
-    phone: '+1 (555) 123-4567',
+    bio: currentUser.bio || '',
+    company: currentUser.company || '',
+    location: currentUser.location || '',
+    website: currentUser.website || '',
+    phone: currentUser.phone || '',
   });
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    toast('Profile updated successfully!', 'success');
-    setTimeout(() => navigate('/dashboard/profile'), 1000);
+    setSaving(true);
+    try {
+      await api.auth.updateMe({ name: form.name, bio: form.bio, company: form.company, location: form.location, website: form.website, phone: form.phone });
+      toast('Profile updated successfully!', 'success');
+      setTimeout(() => navigate('/dashboard/profile'), 800);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+    setSaving(false);
   };
 
   return (
@@ -36,10 +45,11 @@ export default function EditProfilePage() {
       action={
         <button
           onClick={handleSave}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all"
+          disabled={saving}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
         >
           <FiSave size={14} />
-          Save Changes
+          {saving ? 'Saving...' : 'Save Changes'}
         </button>
       }
     >

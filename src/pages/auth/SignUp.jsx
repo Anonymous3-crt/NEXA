@@ -7,6 +7,7 @@ import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { api, setToken, setStoredUser } from '../../api';
 
 export default function SignUp() {
   usePageTitle('Create Account — Nexa');
@@ -32,10 +33,16 @@ export default function SignUp() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const data = await api.auth.signup({ name: form.name, email: form.email, password: form.password });
+      setToken(data.token);
+      setStoredUser(data.user);
+      toast('Account created! Redirecting...', 'success');
+      setTimeout(() => navigate('/dashboard'), 800);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
     setLoading(false);
-    toast('Account created! Check your email to verify.', 'success');
-    setTimeout(() => navigate('/verify-email'), 1200);
   };
 
   return (

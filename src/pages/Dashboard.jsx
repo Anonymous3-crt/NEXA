@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMenu, FiMessageCircle, FiBell, FiSettings, FiUser } from 'react-icons/fi';
 import { DashboardProvider, useDashboard } from '../contexts/DashboardContext';
@@ -80,6 +81,10 @@ function DashboardInner() {
 
 export default function Dashboard() {
   usePageTitle('Messages — Nexa');
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem('nexa_token')) navigate('/login', { replace: true });
+  }, []);
   return (
     <DashboardProvider>
       <motion.div

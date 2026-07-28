@@ -132,7 +132,7 @@ export default function Hero() {
 
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
             <RippleButton
-              to="/login"
+              to="/signup"
               className="group relative px-8 py-4 rounded-2xl gradient-bg text-white font-semibold text-base shadow-xl glow-indigo flex items-center gap-2 transition-all duration-300 hover:shadow-2xl hover:scale-105 active:scale-95"
             >
               <span className="relative z-10 flex items-center gap-2">

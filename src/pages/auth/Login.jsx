@@ -7,6 +7,7 @@ import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { api, setToken, setStoredUser } from '../../api';
 
 export default function Login() {
   usePageTitle('Sign In — Nexa');
@@ -29,10 +30,16 @@ export default function Login() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const data = await api.auth.login(form);
+      setToken(data.token);
+      setStoredUser(data.user);
+      toast('Welcome back! Redirecting...', 'success');
+      setTimeout(() => navigate('/dashboard'), 800);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
     setLoading(false);
-    toast('Welcome back! Redirecting to dashboard...', 'success');
-    setTimeout(() => navigate('/'), 1200);
   };
 
   return (

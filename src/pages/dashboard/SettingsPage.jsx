@@ -5,10 +5,34 @@ import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { useDashboard } from '../../contexts/DashboardContext';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
+const settingsStore = {
+  get(k, def) { const v = localStorage.getItem('nexa_' + k); return v !== null ? JSON.parse(v) : def; },
+  set(k, v) { localStorage.setItem('nexa_' + k, JSON.stringify(v)); },
+};
+
 export default function SettingsPage() {
   usePageTitle('Settings — Nexa');
   const { theme, toggleTheme } = useDashboard();
   const [activeTab, setActiveTab] = useState('general');
+  const [toggles, setToggles] = useState(() => ({
+    messageSounds: settingsStore.get('sound_messages', true),
+    callSounds: settingsStore.get('sound_calls', true),
+    messagePreviews: settingsStore.get('previews', false),
+    groupNotifs: settingsStore.get('notif_group', true),
+    readReceipts: settingsStore.get('privacy_receipts', true),
+    encryption: settingsStore.get('privacy_encryption', true),
+    onlineStatus: settingsStore.get('privacy_online', true),
+    allowDMs: settingsStore.get('privacy_dms', false),
+    reducedMotion: settingsStore.get('motion_reduced', false),
+  }));
+
+  const toggle = (key) => {
+    setToggles((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      settingsStore.set(key.replace(/([A-Z])/g, '_$1').toLowerCase(), next[key]);
+      return next;
+    });
+  };
 
   const tabs = [
     { id: 'general', label: 'General' },
@@ -24,16 +48,16 @@ export default function SettingsPage() {
       { icon: FiDownload, label: 'Download location', value: '~/Downloads/Nexa', type: 'text' },
     ],
     notifications: [
-      { icon: FiVolume2, label: 'Message sounds', toggle: true, enabled: true },
-      { icon: FiVolume2, label: 'Call sounds', toggle: true, enabled: true },
-      { icon: FiEye, label: 'Message previews', toggle: true, enabled: false },
-      { icon: FiUsers, label: 'Group notifications', toggle: true, enabled: true },
+      { icon: FiVolume2, label: 'Message sounds', toggle: true, enabled: toggles.messageSounds, onToggle: () => toggle('messageSounds') },
+      { icon: FiVolume2, label: 'Call sounds', toggle: true, enabled: toggles.callSounds, onToggle: () => toggle('callSounds') },
+      { icon: FiEye, label: 'Message previews', toggle: true, enabled: toggles.messagePreviews, onToggle: () => toggle('messagePreviews') },
+      { icon: FiUsers, label: 'Group notifications', toggle: true, enabled: toggles.groupNotifs, onToggle: () => toggle('groupNotifs') },
     ],
     privacy: [
-      { icon: FiShield, label: 'Read receipts', toggle: true, enabled: true },
-      { icon: FiLock, label: 'End-to-end encryption', toggle: true, enabled: true },
-      { icon: FiEye, label: 'Show online status', toggle: true, enabled: true },
-      { icon: FiUsers, label: 'Allow DMs from anyone', toggle: true, enabled: false },
+      { icon: FiShield, label: 'Read receipts', toggle: true, enabled: toggles.readReceipts, onToggle: () => toggle('readReceipts') },
+      { icon: FiLock, label: 'End-to-end encryption', toggle: true, enabled: toggles.encryption, onToggle: () => toggle('encryption') },
+      { icon: FiEye, label: 'Show online status', toggle: true, enabled: toggles.onlineStatus, onToggle: () => toggle('onlineStatus') },
+      { icon: FiUsers, label: 'Allow DMs from anyone', toggle: true, enabled: toggles.allowDMs, onToggle: () => toggle('allowDMs') },
     ],
     appearance: [
       { icon: theme === 'dark' ? FiMoon : FiSun, label: 'Theme', action: (
@@ -43,7 +67,7 @@ export default function SettingsPage() {
         </button>
       )},
       { icon: FiMonitor, label: 'Font size', value: 'Medium', type: 'select' },
-      { icon: FiVolume2, label: 'Reduced motion', toggle: true, enabled: false },
+      { icon: FiVolume2, label: 'Reduced motion', toggle: true, enabled: toggles.reducedMotion, onToggle: () => toggle('reducedMotion') },
     ],
   };
 
@@ -86,6 +110,7 @@ export default function SettingsPage() {
                     {item.toggle !== undefined && (
                       <motion.div
                         whileTap={{ scale: 0.9 }}
+                        onClick={item.onToggle}
                         className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${item.enabled ? 'bg-indigo-500/40' : 'bg-zinc-700'}`}
                       >
                         <motion.div

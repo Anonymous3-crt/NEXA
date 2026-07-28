@@ -1,66 +1,106 @@
-import { createContext, useContext, useState, useCallback } from 'react';
-import { conversations as initialConversations, messages as initialMessages, currentUser as userData, notifications as initialNotifications } from '../data/mockData';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { api, getStoredUser } from '../api';
+import { useToast } from '../components/ui/Toast';
 
 const DashboardContext = createContext(null);
 
 export function DashboardProvider({ children }) {
+  const toast = useToast();
   const [activeChat, setActiveChat] = useState(null);
-  const [conversations, setConversations] = useState(initialConversations);
-  const [messages, setMessages] = useState(initialMessages);
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const [currentUser] = useState(userData);
-  const [theme, setTheme] = useState('dark');
+  const [conversations, setConversations] = useState([]);
+  const [messages, setMessages] = useState({});
+  const [notifications, setNotifications] = useState([]);
+  const [currentUser, setCurrentUser] = useState(getStoredUser());
+  const [theme, setTheme] = useState(() => localStorage.getItem('nexa_theme') || 'dark');
+  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [contacts, setContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    loadConversations();
+    loadNotifications();
+    loadContacts();
+  }, []);
+
+  async function loadConversations() {
+    try {
+      const data = await api.conversations.list();
+      setConversations(data.conversations || []);
+    } catch { /* ok */ }
+    setLoading(false);
+  }
+
+  async function loadNotifications() {
+    try {
+      const data = await api.notifications.list();
+      setNotifications(data.notifications || []);
+    } catch { /* ok */ }
+  }
+
+  async function loadContacts() {
+    try {
+      const data = await api.contacts.list();
+      setContacts(data.contacts || []);
+    } catch { /* ok */ }
+  }
+
+  async function loadMessages(chatId) {
+    try {
+      const data = await api.messages.list(chatId);
+      setMessages(prev => ({ ...prev, [chatId]: data.messages || [] }));
+    } catch { /* ok */ }
+  }
 
   const selectChat = useCallback((chatId) => {
     setActiveChat(chatId);
+    if (!messages[chatId]) loadMessages(chatId);
     setConversations((prev) =>
       prev.map((c) => (c.id === chatId ? { ...c, unread: 0 } : c))
     );
     setNotifOpen(false);
     setSettingsOpen(false);
     setProfileOpen(false);
-  }, []);
+  }, [messages]);
 
-  const sendMessage = useCallback((text) => {
+  const sendMessage = useCallback(async (text) => {
     if (!activeChat || !text.trim()) return;
-    const newMsg = {
-      id: `m${Date.now()}`,
-      sender: 'user',
-      text: text.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-    setMessages((prev) => ({
-      ...prev,
-      [activeChat]: [...(prev[activeChat] || []), newMsg],
-    }));
-    const contact = conversations.find((c) => c.id === activeChat);
-    if (contact) {
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === activeChat
-            ? { ...c, lastMessage: text.trim(), time: 'Just now' }
-            : c
-        )
-      );
+    const trimmed = text.trim();
+    try {
+      const data = await api.messages.send(activeChat, trimmed);
+      if (data.message) {
+        setMessages((prev) => ({
+          ...prev,
+          [activeChat]: [...(prev[activeChat] || []), data.message],
+        }));
+      }
+    } catch {
+      toast('Failed to send message', 'error');
     }
-  }, [activeChat, conversations]);
+  }, [activeChat]);
 
-  const markNotifRead = useCallback((id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const markNotifRead = useCallback(async (id) => {
+    try {
+      await api.notifications.markRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: 1 } : n))
+      );
+    } catch { /* ok */ }
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
-  }, [theme]);
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('nexa_theme', next);
+      document.documentElement.setAttribute('data-theme', next);
+      return next;
+    });
+  }, []);
 
   const filteredConversations = conversations.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -70,7 +110,7 @@ export function DashboardProvider({ children }) {
     <DashboardContext.Provider
       value={{
         activeChat, selectChat, conversations: filteredConversations, allConversations: conversations,
-        messages, sendMessage, currentUser, theme, toggleTheme,
+        messages, sendMessage, currentUser, theme, toggleTheme, loading, contacts,
         sidebarOpen, setSidebarOpen, notifOpen, setNotifOpen,
         settingsOpen, setSettingsOpen, profileOpen, setProfileOpen,
         emojiPickerOpen, setEmojiPickerOpen, searchQuery, setSearchQuery,
