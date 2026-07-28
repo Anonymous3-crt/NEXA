@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ToastProvider } from './components/ui/Toast';
+import { SocketProvider } from './socket.jsx';
 import LoadingScreen from './components/ui/LoadingScreen';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -97,10 +98,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <SkipLink />
-      <ToastProvider>
-        <ScrollToTop />
-        <AppRoutes />
-      </ToastProvider>
+      <SocketProvider>
+        <ToastProvider>
+          <ScrollToTop />
+          <AppRoutes />
+        </ToastProvider>
+      </SocketProvider>
     </BrowserRouter>
   );
 }

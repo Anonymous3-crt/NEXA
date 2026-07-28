@@ -1,11 +1,15 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { api, getStoredUser } from '../api';
 import { useToast } from '../components/ui/Toast';
+import { useSocket } from '../socket';
 
 const DashboardContext = createContext(null);
 
 export function DashboardProvider({ children }) {
   const toast = useToast();
+  const socket = useSocket();
+  const socketRef = useRef(socket);
+  socketRef.current = socket;
   const [activeChat, setActiveChat] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState({});
@@ -27,6 +31,21 @@ export function DashboardProvider({ children }) {
     loadNotifications();
     loadContacts();
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handler = (message) => {
+      setMessages(prev => ({
+        ...prev,
+        [message.conversation_id]: [...(prev[message.conversation_id] || []), message],
+      }));
+      setConversations(prev =>
+        prev.map(c => c.id === message.conversation_id ? { ...c, lastMessage: message.text, time: 'Just now' } : c)
+      );
+    };
+    socket.on('message:new', handler);
+    return () => { socket.off('message:new', handler); };
+  }, [socket]);
 
   async function loadConversations() {
     try {
@@ -66,21 +85,16 @@ export function DashboardProvider({ children }) {
     setNotifOpen(false);
     setSettingsOpen(false);
     setProfileOpen(false);
+    if (socketRef.current) socketRef.current.emit('join:conversation', chatId);
   }, [messages]);
 
-  const sendMessage = useCallback(async (text) => {
+  const sendMessage = useCallback((text) => {
     if (!activeChat || !text.trim()) return;
     const trimmed = text.trim();
-    try {
-      const data = await api.messages.send(activeChat, trimmed);
-      if (data.message) {
-        setMessages((prev) => ({
-          ...prev,
-          [activeChat]: [...(prev[activeChat] || []), data.message],
-        }));
-      }
-    } catch {
-      toast('Failed to send message', 'error');
+    if (socketRef.current) {
+      socketRef.current.emit('message:send', { conversationId: activeChat, text: trimmed });
+    } else {
+      toast('Not connected to server', 'error');
     }
   }, [activeChat]);
 
