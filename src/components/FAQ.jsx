@@ -47,6 +47,8 @@ export default function FAQ() {
             >
               <button
                 onClick={() => toggle(i)}
+                aria-expanded={openIndex === i}
+                aria-controls={`faq-answer-${i}`}
                 className="w-full flex items-center justify-between px-6 py-5 text-left text-white font-medium transition-colors"
               >
                 <span className="text-sm sm:text-base pr-4">{faq.q}</span>
@@ -64,6 +66,8 @@ export default function FAQ() {
                 {openIndex === i && (
                   <motion.div
                     key="content"
+                    id={`faq-answer-${i}`}
+                    role="region"
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}

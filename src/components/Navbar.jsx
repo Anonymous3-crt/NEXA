@@ -62,7 +62,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1" role="navigation" aria-label="Main navigation">
             {navLinks.map((link) => {
               const sectionId = link.href.replace('#', '');
               const isActive = activeSection === sectionId;
@@ -70,6 +70,7 @@ export default function Navbar() {
                 <a
                   key={link.label}
                   href={link.href}
+                  aria-current={isActive ? 'true' : undefined}
                   className={`relative px-4 py-2 text-sm rounded-xl transition-all duration-300 ${
                     isActive
                       ? 'text-white'

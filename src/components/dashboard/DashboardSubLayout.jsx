@@ -45,7 +45,7 @@ export default function DashboardSubLayout({ children, title, subtitle, action }
               <FiX size={18} />
             </button>
           </div>
-          <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 no-scrollbar">
+          <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 no-scrollbar" aria-label="Dashboard navigation">
             {navItems.map((item) => {
               const isActive = pathname === item.path || (item.path !== '/dashboard' && pathname.startsWith(item.path));
               const Icon = item.icon;
@@ -54,6 +54,7 @@ export default function DashboardSubLayout({ children, title, subtitle, action }
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileNav(false)}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all duration-200 ${
                     isActive
                       ? 'bg-indigo-500/10 text-indigo-400 font-medium border border-indigo-500/20'
@@ -93,7 +94,7 @@ export default function DashboardSubLayout({ children, title, subtitle, action }
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/[0.05] bg-[#0a0a0f]/80 backdrop-blur-lg">
           <div className="flex items-center gap-3">
-            <button onClick={() => setMobileNav(true)} className="lg:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all">
+            <button onClick={() => setMobileNav(true)} className="lg:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all" aria-label="Open navigation menu">
               <FiMenu size={20} />
             </button>
             <div>

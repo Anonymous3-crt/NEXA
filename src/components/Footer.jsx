@@ -34,17 +34,17 @@ export default function Footer() {
             </p>
             <div className="flex gap-3">
               {[
-                { icon: FiGithub, href: '#' },
-                { icon: FiTwitter, href: '#' },
-                { icon: FiLinkedin, href: '#' },
-              ].map(({ icon: Icon, href }, i) => (
+                { icon: FiGithub, href: '#', label: 'GitHub' },
+                { icon: FiTwitter, href: '#', label: 'Twitter' },
+                { icon: FiLinkedin, href: '#', label: 'LinkedIn' },
+              ].map(({ icon: Icon, href, label }) => (
                 <motion.a
-                  key={i}
+                  key={label}
                   href={href}
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-9 h-9 rounded-xl glass flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/[0.1] transition-all"
-                  aria-label="Social link"
+                  aria-label={`Follow us on ${label}`}
                 >
                   <Icon size={16} />
                 </motion.a>
