@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
   website TEXT DEFAULT '',
   phone TEXT DEFAULT '',
   verified INTEGER DEFAULT 0,
+  avatar TEXT DEFAULT '',
+  verification_code TEXT,
+  reset_token TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
 

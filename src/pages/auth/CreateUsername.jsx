@@ -6,8 +6,7 @@ import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
-
-const takenUsernames = ['admin', 'nexa', 'test', 'user', 'root'];
+import { api } from '../../api';
 
 export default function CreateUsername() {
   usePageTitle('Create Username — Nexa');
@@ -27,15 +26,15 @@ export default function CreateUsername() {
     if (value.length < 3) { setAvailable(null); return; }
 
     setChecking(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setChecking(false);
-
-    if (takenUsernames.includes(value)) {
+    try {
+      const data = await api.auth.checkUsername(value);
+      setAvailable(data.available);
+      if (!data.available) setError('Username is taken');
+    } catch {
       setAvailable(false);
-      setError('Username is taken');
-    } else {
-      setAvailable(true);
+      setError('Could not check username');
     }
+    setChecking(false);
   };
 
   const handleSubmit = async (e) => {
@@ -43,10 +42,14 @@ export default function CreateUsername() {
     if (!username || username.length < 3) { setError('At least 3 characters'); return; }
     if (!available) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      await api.auth.updateMe({ username });
+      toast('Welcome to Nexa! Your account is ready.', 'success');
+      setTimeout(() => navigate('/'), 1200);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
     setLoading(false);
-    toast('Welcome to Nexa! Your account is ready.', 'success');
-    setTimeout(() => navigate('/'), 1200);
   };
 
   return (

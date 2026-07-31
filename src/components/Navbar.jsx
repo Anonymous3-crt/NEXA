@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiMessageCircle, FiArrowRight } from 'react-icons/fi';
+import { FiMenu, FiX, FiMessageCircle, FiArrowRight, FiSearch } from 'react-icons/fi';
 import { navLinks } from '../data/mockData';
+import { useCommandPalette } from './ui/CommandPaletteContext';
+
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
 export default function Navbar() {
-  const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('');
+  const { setOpen } = useCommandPalette();
 
   useEffect(() => {
     const onScroll = () => {
@@ -41,11 +44,13 @@ export default function Navbar() {
           : 'bg-transparent'
       }`}
     >
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/[0.03]">
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/[0.03] overflow-hidden">
         <motion.div
-          className="h-full gradient-bg"
+          className="relative h-full aurora-progress"
           style={{ scaleX: scrollProgress, transformOrigin: 'left' }}
-        />
+        >
+          <span className="progress-shine" />
+        </motion.div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,6 +94,21 @@ export default function Navbar() {
               );
             })}
             <div className="flex items-center gap-2 ml-4 pl-4 border-l border-white/[0.06]">
+              <span className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/[0.06] border border-emerald-500/10">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-glow" />
+                <span className="text-[10px] text-emerald-400 font-medium">All systems live</span>
+              </span>
+              <button
+                onClick={() => setOpen(true)}
+                className="hidden md:flex items-center gap-2 px-3 py-2 text-sm text-zinc-400 hover:text-white rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-indigo-500/25 transition-all duration-300"
+                aria-label="Open search"
+              >
+                <FiSearch size={14} />
+                <span className="text-zinc-500">Search</span>
+                <kbd className="px-1.5 py-0.5 rounded-md bg-white/[0.06] text-[10px] text-zinc-500 font-mono">
+                  {isMac ? '⌘K' : 'Ctrl K'}
+                </kbd>
+              </button>
               <Link
                 to="/login"
                 className="px-4 py-2 text-sm text-zinc-400 hover:text-white rounded-xl transition-all duration-300 hover:bg-white/[0.05]"
@@ -105,13 +125,22 @@ export default function Navbar() {
             </div>
           </div>
 
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden relative z-50 p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/[0.05] transition-all"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <FiX size={22} /> : <FiMenu size={22} />}
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setOpen(true)}
+              className="md:hidden p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/[0.05] transition-all"
+              aria-label="Open search"
+            >
+              <FiSearch size={18} />
+            </button>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden relative z-50 p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/[0.05] transition-all"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+            </button>
+          </div>
         </div>
       </div>
 

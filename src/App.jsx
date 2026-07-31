@@ -1,9 +1,10 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ToastProvider } from './components/ui/Toast';
 import { SocketProvider } from './socket.jsx';
-import LoadingScreen from './components/ui/LoadingScreen';
+import BootScreen from './components/ui/BootScreen';
+import CommandPalette from './components/ui/CommandPalette';
 
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -48,38 +49,75 @@ function ScrollToTop() {
   return null;
 }
 
+function GlobalCursorGlow() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!ref.current) return;
+      ref.current.style.setProperty('--mx', `${e.clientX}px`);
+      ref.current.style.setProperty('--my', `${e.clientY}px`);
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
+  }, []);
+  return (
+    <div
+      ref={ref}
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[5]"
+      style={{
+        background:
+          'radial-gradient(700px circle at var(--mx, 50%) var(--my, 50%), rgba(99,102,241,0.045), transparent 55%)',
+      }}
+    />
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
+  const [showBoot, setShowBoot] = useState(() => !sessionStorage.getItem('nexa_booted'));
+
+  useEffect(() => {
+    if (!showBoot) return;
+    const t = setTimeout(() => {
+      setShowBoot(false);
+      sessionStorage.setItem('nexa_booted', '1');
+    }, 1800);
+    return () => clearTimeout(t);
+  }, [showBoot]);
 
   return (
-    <AnimatePresence mode="wait">
-      <Suspense fallback={<LoadingScreen />}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<AnimatedPage><Home /></AnimatedPage>} />
-          <Route path="/dashboard" element={<AnimatedPage><Dashboard /></AnimatedPage>} />
-          <Route path="/dashboard/profile" element={<AnimatedPage><ProfilePage /></AnimatedPage>} />
-          <Route path="/dashboard/edit-profile" element={<AnimatedPage><EditProfilePage /></AnimatedPage>} />
-          <Route path="/dashboard/settings" element={<AnimatedPage><SettingsPage /></AnimatedPage>} />
-          <Route path="/dashboard/notifications" element={<AnimatedPage><NotificationsPage /></AnimatedPage>} />
-          <Route path="/dashboard/archived" element={<AnimatedPage><ArchivedPage /></AnimatedPage>} />
-          <Route path="/dashboard/starred" element={<AnimatedPage><StarredPage /></AnimatedPage>} />
-          <Route path="/dashboard/media" element={<AnimatedPage><MediaPage /></AnimatedPage>} />
-          <Route path="/dashboard/calls" element={<AnimatedPage><CallsPage /></AnimatedPage>} />
-          <Route path="/dashboard/contacts" element={<AnimatedPage><ContactsPage /></AnimatedPage>} />
-          <Route path="/dashboard/help" element={<AnimatedPage><HelpPage /></AnimatedPage>} />
-          <Route path="/login" element={<AnimatedPage><Login /></AnimatedPage>} />
-          <Route path="/signup" element={<AnimatedPage><SignUp /></AnimatedPage>} />
-          <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
-          <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
-          <Route path="/verify-email" element={<AnimatedPage><EmailVerification /></AnimatedPage>} />
-          <Route path="/create-username" element={<AnimatedPage><CreateUsername /></AnimatedPage>} />
-          <Route path="/about" element={<AnimatedPage><AboutPage /></AnimatedPage>} />
-          <Route path="/privacy" element={<AnimatedPage><PrivacyPage /></AnimatedPage>} />
-          <Route path="/terms" element={<AnimatedPage><TermsPage /></AnimatedPage>} />
-          <Route path="*" element={<AnimatedPage><NotFoundPage /></AnimatedPage>} />
-        </Routes>
-      </Suspense>
-    </AnimatePresence>
+    <>
+      <AnimatePresence>{showBoot && <BootScreen key="boot" />}</AnimatePresence>
+      <AnimatePresence mode="wait">
+        <Suspense fallback={<BootScreen />}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<AnimatedPage><Home /></AnimatedPage>} />
+            <Route path="/dashboard" element={<AnimatedPage><Dashboard /></AnimatedPage>} />
+            <Route path="/dashboard/profile" element={<AnimatedPage><ProfilePage /></AnimatedPage>} />
+            <Route path="/dashboard/edit-profile" element={<AnimatedPage><EditProfilePage /></AnimatedPage>} />
+            <Route path="/dashboard/settings" element={<AnimatedPage><SettingsPage /></AnimatedPage>} />
+            <Route path="/dashboard/notifications" element={<AnimatedPage><NotificationsPage /></AnimatedPage>} />
+            <Route path="/dashboard/archived" element={<AnimatedPage><ArchivedPage /></AnimatedPage>} />
+            <Route path="/dashboard/starred" element={<AnimatedPage><StarredPage /></AnimatedPage>} />
+            <Route path="/dashboard/media" element={<AnimatedPage><MediaPage /></AnimatedPage>} />
+            <Route path="/dashboard/calls" element={<AnimatedPage><CallsPage /></AnimatedPage>} />
+            <Route path="/dashboard/contacts" element={<AnimatedPage><ContactsPage /></AnimatedPage>} />
+            <Route path="/dashboard/help" element={<AnimatedPage><HelpPage /></AnimatedPage>} />
+            <Route path="/login" element={<AnimatedPage><Login /></AnimatedPage>} />
+            <Route path="/signup" element={<AnimatedPage><SignUp /></AnimatedPage>} />
+            <Route path="/forgot-password" element={<AnimatedPage><ForgotPassword /></AnimatedPage>} />
+            <Route path="/reset-password" element={<AnimatedPage><ResetPassword /></AnimatedPage>} />
+            <Route path="/verify-email" element={<AnimatedPage><EmailVerification /></AnimatedPage>} />
+            <Route path="/create-username" element={<AnimatedPage><CreateUsername /></AnimatedPage>} />
+            <Route path="/about" element={<AnimatedPage><AboutPage /></AnimatedPage>} />
+            <Route path="/privacy" element={<AnimatedPage><PrivacyPage /></AnimatedPage>} />
+            <Route path="/terms" element={<AnimatedPage><TermsPage /></AnimatedPage>} />
+            <Route path="*" element={<AnimatedPage><NotFoundPage /></AnimatedPage>} />
+          </Routes>
+        </Suspense>
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -100,8 +138,11 @@ export default function App() {
       <SkipLink />
       <SocketProvider>
         <ToastProvider>
-          <ScrollToTop />
-          <AppRoutes />
+          <CommandPalette>
+            <ScrollToTop />
+            <GlobalCursorGlow />
+            <AppRoutes />
+          </CommandPalette>
         </ToastProvider>
       </SocketProvider>
     </BrowserRouter>

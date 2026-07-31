@@ -1,321 +1,328 @@
-import { useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import {
-  FiArrowRight, FiPlay, FiMessageCircle, FiUser, FiCpu, FiSend,
-} from 'react-icons/fi';
-import { BackgroundOrbs, FloatingIcons, GridPattern } from './BackgroundEffects';
+import { motion, useMotionValue, useSpring, useScroll, useTransform } from 'framer-motion';
+import { FiArrowRight, FiGrid, FiStar, FiShield, FiZap, FiGlobe, FiChevronDown } from 'react-icons/fi';
+import BackgroundEffects from './BackgroundEffects';
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
+  visible: { transition: { staggerChildren: 0.08 } },
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 };
 
-const stats = [
-  { value: '10K+', label: 'Active Users', icon: FiUsers },
-  { value: '99.9%', label: 'Uptime', icon: FiShield },
-  { value: '50+', label: 'Languages', icon: FiGlobe },
-  { value: '4.9', label: 'Avg Rating', icon: FiStar },
+const glowPulse = {
+  animate: {
+    boxShadow: [
+      '0 0 24px rgba(99,102,241,0.25), 0 4px 16px rgba(99,102,241,0.15)',
+      '0 0 40px rgba(99,102,241,0.35), 0 0 60px rgba(99,102,241,0.1), 0 8px 24px rgba(99,102,241,0.2)',
+      '0 0 24px rgba(99,102,241,0.25), 0 4px 16px rgba(99,102,241,0.15)',
+    ],
+    transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+  },
+};
+
+const avatars = [
+  { src: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent', delay: 0 },
+  { src: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=transparent', delay: 0.15 },
+  { src: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Salem&backgroundColor=transparent', delay: 0.3 },
+  { src: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Abby&backgroundColor=transparent', delay: 0.45 },
+  { src: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&backgroundColor=transparent', delay: 0.6 },
 ];
 
-const chatMessages = [
-  { role: 'ai', text: 'Hey! How can I help you today?' },
-  { role: 'user', text: 'Can you draft a product launch email?' },
-  { role: 'ai', text: 'Absolutely! Here\'s a draft...' },
-];
+function GlowButton({ children, className = '' }) {
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 100, damping: 15 });
+  const springY = useSpring(y, { stiffness: 100, damping: 15 });
 
-const contacts = [
-  { name: 'Alice', online: true, color: '#6366f1' },
-  { name: 'Bob', online: true, color: '#8b5cf6' },
-  { name: 'Carol', online: false, color: '#06b6d4' },
-  { name: 'Dave', online: true, color: '#ec4899' },
-];
+  const handleMouse = useCallback((e) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width;
+    const py = (e.clientY - rect.top) / rect.height;
+    x.set((px - 0.5) * 8);
+    y.set((py - 0.5) * -8);
+  }, [x, y]);
 
-function RippleButton({ children, to, className = '' }) {
-  const [ripples, setRipples] = useState([]);
-  const handleClick = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const id = Date.now();
-    setRipples((prev) => [...prev, { x, y, id }]);
-    setTimeout(() => setRipples((prev) => prev.filter((r) => r.id !== id)), 600);
-  };
+  const handleLeave = useCallback(() => { x.set(0); y.set(0); }, [x, y]);
+
   return (
-    <Link
-      to={to}
-      onClick={handleClick}
-      className={`relative overflow-hidden ${className}`}
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={handleLeave}
+      style={{ rotateX: springY, rotateY: springX, perspective: 600 }}
+      className={className}
     >
       {children}
-      {ripples.map((r) => (
-        <span
-          key={r.id}
-          className="absolute w-4 h-4 bg-white/30 rounded-full pointer-events-none"
-          style={{
-            left: r.x - 8,
-            top: r.y - 8,
-            animation: 'ripple 0.6s ease-out forwards',
-          }}
-        />
-      ))}
-    </Link>
+    </motion.div>
   );
 }
 
-function FiUsers() {
+function TypewriterText({ text, className }) {
+  const [displayed, setDisplayed] = useState('');
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!text) return;
+    setDisplayed('');
+    setDone(false);
+    let i = 0;
+    const interval = setInterval(() => {
+      setDisplayed(text.slice(0, i + 1));
+      i++;
+      if (i >= text.length) { clearInterval(interval); setDone(true); }
+    }, 25);
+    return () => clearInterval(interval);
+  }, [text]);
+
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
+    <span className={className}>
+      {displayed}
+      {!done && <motion.span className="inline-block w-[2px] h-[1em] ml-0.5 bg-indigo-400" animate={{ opacity: [1, 0] }} transition={{ duration: 0.8, repeat: Infinity }} />}
+    </span>
   );
 }
-function FiShield() {
+
+function FloatingBadge({ icon: Icon, label, value, position, delay = 0, color = 'indigo' }) {
+  const colorMap = {
+    indigo: { bg: 'rgba(99,102,241,0.06)', border: 'rgba(99,102,241,0.1)', text: 'rgba(167,139,250,0.5)', icon: 'rgba(167,139,250,0.3)' },
+    emerald: { bg: 'rgba(16,185,129,0.06)', border: 'rgba(16,185,129,0.1)', text: 'rgba(52,211,153,0.5)', icon: 'rgba(52,211,153,0.3)' },
+    cyan: { bg: 'rgba(6,182,212,0.06)', border: 'rgba(6,182,212,0.1)', text: 'rgba(34,211,238,0.5)', icon: 'rgba(34,211,238,0.3)' },
+    pink: { bg: 'rgba(236,72,153,0.06)', border: 'rgba(236,72,153,0.1)', text: 'rgba(244,114,182,0.5)', icon: 'rgba(244,114,182,0.3)' },
+  };
+  const c = colorMap[color] || colorMap.indigo;
+
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
+    <motion.div
+      className="absolute hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-xl"
+      style={{ background: c.bg, borderColor: c.border }}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
+      transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: delay + position.delay || 0 }}
+    >
+      {Icon && <Icon className="text-xs" style={{ color: c.icon }} />}
+      <span className="text-xs font-medium" style={{ color: c.text }}>{value}</span>
+    </motion.div>
   );
 }
-function FiGlobe() {
+
+function SocialProof() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
+    <motion.div variants={itemVariants} className="flex items-center justify-center gap-4 mt-8">
+      <div className="flex -space-x-2.5">
+        {avatars.map((avatar, i) => (
+          <motion.div
+            key={i}
+            className="w-8 h-8 rounded-full border-2 border-[#0a0a14] overflow-hidden bg-zinc-800"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.2 + avatar.delay, duration: 0.4 }}
+          >
+            <img src={avatar.src} alt="" className="w-full h-full object-cover" />
+          </motion.div>
+        ))}
+      </div>
+      <motion.div
+        className="flex flex-col items-start"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.8, duration: 0.5 }}
+      >
+        <div className="flex items-center gap-1">
+          {[1,2,3,4,5].map((i) => (
+            <svg key={i} className="w-3 h-3 text-amber-400/70" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          ))}
+        </div>
+        <span className="text-[11px] text-zinc-500 leading-tight">Loved by 50,000+ creators</span>
+      </motion.div>
+    </motion.div>
   );
 }
-function FiStar() {
+
+function StatBar() {
+  const stats = [
+    { icon: FiStar, label: '5M+ conversations', color: 'rgba(167,139,250,0.4)' },
+    { icon: FiShield, label: 'End-to-end encrypted', color: 'rgba(52,211,153,0.4)' },
+    { icon: FiZap, label: '99.9% uptime', color: 'rgba(34,211,238,0.4)' },
+    { icon: FiGlobe, label: '50+ languages', color: 'rgba(244,114,182,0.4)' },
+  ];
+
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
+    <motion.div
+      variants={itemVariants}
+      className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-12 sm:mt-14"
+    >
+      {stats.map((stat, i) => (
+        <motion.div
+          key={stat.label}
+          className="flex items-center gap-2"
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        >
+          <stat.icon className="text-xs" style={{ color: stat.color }} />
+          <span className="text-xs text-zinc-500">{stat.label}</span>
+          {i < stats.length - 1 && <span className="w-[2px] h-[2px] rounded-full bg-zinc-700 mx-1" />}
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
+function ScrollIndicator() {
+  return (
+    <motion.div
+      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 2.5, duration: 0.8 }}
+    >
+      <motion.div
+        className="flex flex-col items-center gap-2"
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <span className="text-[10px] text-zinc-600 tracking-widest uppercase">Scroll</span>
+        <FiChevronDown className="text-zinc-600 text-sm" />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function FloatingBadges() {
+  const badges = [
+    { icon: FiZap, label: '10x faster', position: { top: '18%', left: '5%' }, color: 'cyan', delay: 0 },
+    { icon: FiShield, label: 'Secure', position: { top: '25%', left: '8%' }, color: 'emerald', delay: 1.5 },
+    { icon: FiStar, label: '4.9 rating', position: { bottom: '22%', right: '3%' }, color: 'pink', delay: 0.8 },
+    { icon: FiGlobe, label: 'Global', position: { top: '12%', right: '3%' }, color: 'indigo', delay: 2 },
+  ];
+
+  return (
+    <div className="absolute inset-0 pointer-events-none z-20">
+      {badges.map((badge, i) => (
+        <motion.div
+          key={i}
+          className="absolute hidden 2xl:flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-xl"
+          style={{
+            ...badge.position,
+            background: badge.color === 'indigo' ? 'rgba(99,102,241,0.06)' : badge.color === 'emerald' ? 'rgba(16,185,129,0.06)' : badge.color === 'cyan' ? 'rgba(6,182,212,0.06)' : 'rgba(236,72,153,0.06)',
+            borderColor: badge.color === 'indigo' ? 'rgba(99,102,241,0.1)' : badge.color === 'emerald' ? 'rgba(16,185,129,0.1)' : badge.color === 'cyan' ? 'rgba(6,182,212,0.1)' : 'rgba(236,72,153,0.1)',
+          }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0, y: [0, -4, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: badge.delay }}
+        >
+          <badge.icon className="text-xs" style={{
+            color: badge.color === 'indigo' ? 'rgba(167,139,250,0.3)' : badge.color === 'emerald' ? 'rgba(52,211,153,0.3)' : badge.color === 'cyan' ? 'rgba(34,211,238,0.3)' : 'rgba(244,114,182,0.3)',
+          }} />
+          <span className="text-xs font-medium text-zinc-500">{badge.label}</span>
+        </motion.div>
+      ))}
+    </div>
   );
 }
 
 export default function Hero() {
+  const { scrollY } = useScroll();
+  const bgY = useTransform(scrollY, [0, 500], [0, -80]);
+  const opacityScale = useTransform(scrollY, [0, 400], [1, 0.4]);
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      <BackgroundOrbs />
-      <GridPattern />
-      <FloatingIcons />
+    <motion.section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ y: bgY }}>
+      <BackgroundEffects />
 
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#08080d] via-[#08080d]/80 to-transparent pointer-events-none z-10" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <FloatingBadges />
+
+      <motion.div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32" style={{ opacity: opacityScale }}>
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="text-center max-w-4xl mx-auto"
         >
-          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-sm text-zinc-400 mb-8">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Now available in public beta
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass text-xs text-zinc-400 mb-8 border border-indigo-500/8">
+            <motion.span
+              className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+              animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            Now in public beta — free to use
+            <span className="text-zinc-600 ml-1 hidden sm:inline">· 5,782 online</span>
           </motion.div>
 
-          <motion.h1 variants={itemVariants} className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6">
-            <span className="text-white">Intelligent</span>
+          <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05] tracking-tight mb-6">
+            <span className="text-white">Your Intelligent</span>
             <br />
-            <span className="gradient-text">Conversations</span>
-            <br />
-            <span className="text-white">Redefined</span>
+            <span className="inline-block mt-1">
+              <span className="text-white">AI</span>{' '}
+              <span className="gradient-text">Workspace</span>
+            </span>
           </motion.h1>
 
-          <motion.p variants={itemVariants} className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Experience the next generation of AI-powered chat. Context-aware, instant responses, enterprise-grade security — all wrapped in a beautifully designed interface.
+          <motion.p variants={itemVariants} className="text-base sm:text-lg lg:text-xl text-zinc-400 max-w-2xl mx-auto mb-3 leading-relaxed">
+            <TypewriterText text="Chat smarter, create faster, write better, and solve more with one powerful AI assistant." />
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-            <RippleButton
-              to="/signup"
-              className="group relative px-8 py-4 rounded-2xl gradient-bg text-white font-semibold text-base shadow-xl glow-indigo flex items-center gap-2 transition-all duration-300 hover:shadow-2xl hover:scale-105 active:scale-95"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Start Chatting Free
-                <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-              </span>
-            </RippleButton>
-            <motion.a
-              href="#showcase"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden px-8 py-4 rounded-2xl glass text-zinc-300 font-semibold text-base hover:bg-white/[0.08] transition-all duration-300 flex items-center gap-2"
-            >
-              <FiPlay className="group-hover:scale-110 transition-transform" />
-              See How It Works
-            </motion.a>
-          </motion.div>
-        </motion.div>
+          <motion.p variants={itemVariants} className="text-sm sm:text-base text-zinc-500 max-w-xl mx-auto mb-10 leading-relaxed">
+            Nexa combines intelligent conversations with a beautiful, lightning-fast interface to help you work, learn, brainstorm, and create — all in one seamless experience.
+          </motion.p>
 
-        <div className="grid lg:grid-cols-5 gap-6 items-start mb-20">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="lg:col-span-3 glass-strong rounded-3xl p-4 glow-card"
-          >
-            <div className="bg-[#0a0a0f] rounded-2xl overflow-hidden border border-white/[0.05]">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-                </div>
-                <span className="text-xs text-zinc-600 ml-3 font-mono">nexa.app — chat</span>
-              </div>
-              <div className="flex h-[420px]">
-                <div className="w-56 border-r border-white/[0.05] p-3 space-y-2 hidden sm:block">
-                  <div className="text-xs text-zinc-600 font-medium px-2 pb-2 border-b border-white/[0.05]">Chats</div>
-                  {contacts.map((c) => (
-                    <div key={c.name} className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer">
-                      <div className="relative w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0" style={{ background: c.color }}>
-                        {c.name[0]}
-                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0a0a0f] ${c.online ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
-                      </div>
-                      <span className="text-xs text-zinc-300">{c.name}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex-1 flex flex-col">
-                  <div className="flex-1 p-4 space-y-3 overflow-hidden">
-                    {chatMessages.map((msg, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 + i * 0.3, duration: 0.4 }}
-                        className={`flex items-start gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-                      >
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                          msg.role === 'ai' ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : 'bg-zinc-800'
-                        }`}>
-                          {msg.role === 'ai' ? <FiCpu className="text-white text-xs" /> : <FiUser className="text-zinc-300 text-xs" />}
-                        </div>
-                        <div className={`max-w-[75%] px-3.5 py-2 rounded-2xl text-xs leading-relaxed ${
-                          msg.role === 'ai' ? 'glass text-zinc-200' : 'gradient-bg text-white'
-                        }`}>
-                          {msg.text}
-                        </div>
-                      </motion.div>
-                    ))}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 2, duration: 0.5 }}
-                      className="flex items-center gap-2 pt-2"
-                    >
-                      <div className="flex-1 h-9 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center px-3">
-                        <span className="text-xs text-zinc-600">Type your message...</span>
-                      </div>
-                      <div className="w-9 h-9 rounded-xl gradient-bg flex items-center justify-center">
-                        <FiSend className="text-white text-xs" />
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <div className="lg:col-span-2 space-y-4">
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="glass rounded-2xl p-5 glow-card"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
-                  <FiCpu className="text-white" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-white">AI Assistant</div>
-                  <div className="text-xs text-zinc-500">Always active</div>
-                </div>
-                <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-              <div className="space-y-2">
-                {['Draft a response', 'Summarize thread', 'Translate message'].map((s) => (
-                  <div key={s} className="text-xs text-zinc-500 px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors cursor-pointer">
-                    {s}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="glass rounded-2xl p-5 glow-card"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-white">Recent Files</span>
-                <span className="text-xs text-zinc-500">3 new</span>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { name: 'design_system.pdf', size: '2.4 MB' },
-                  { name: 'meeting_notes.md', size: '12 KB' },
-                  { name: 'brand_guidelines.png', size: '4.1 MB' },
-                ].map((f) => (
-                  <div key={f.name} className="flex items-center gap-2 text-xs text-zinc-400 px-3 py-2 rounded-xl bg-white/[0.03]">
-                    <span className="text-indigo-400">📄</span>
-                    <span className="flex-1 truncate">{f.name}</span>
-                    <span className="text-zinc-600">{f.size}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-              className="glass rounded-2xl p-5 glow-card border-l-2 border-l-emerald-500/30"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                  <FiShield className="text-emerald-400" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-white">End-to-end encrypted</div>
-                  <div className="text-xs text-emerald-400/80">Messages are private</div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
-        >
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <GlowButton>
               <motion.div
-                key={stat.label}
-                whileHover={{ y: -4, scale: 1.02 }}
-                className="glass rounded-2xl p-5 text-center transition-all duration-300 hover:bg-white/[0.06] glow-card cursor-default"
+                className="relative"
+                animate={glowPulse.animate}
+                transition={glowPulse.transition}
+                style={{ borderRadius: '16px' }}
               >
-                <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <Icon className="text-white" />
-                </div>
-                <div className="text-2xl sm:text-3xl font-bold gradient-text mb-1">{stat.value}</div>
-                <div className="text-sm text-zinc-500">{stat.label}</div>
+                <Link
+                  to="/signup"
+                  className="group relative block px-7 sm:px-8 py-3.5 rounded-2xl text-white font-semibold text-sm sm:text-base shadow-xl overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                  }}
+                  onMouseEnter={(e) => { const t = e.currentTarget; t.style.transform = 'scale(1.04)'; const s = t.querySelector('.btn-shine'); if (s) s.style.opacity = '1'; }}
+                  onMouseLeave={(e) => { const t = e.currentTarget; t.style.transform = 'scale(1)'; const s = t.querySelector('.btn-shine'); if (s) s.style.opacity = '0'; }}
+                >
+                  <span className="btn-shine absolute inset-0 opacity-0 transition-opacity duration-500" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)', transform: 'skewX(-20deg)' }} />
+                  <span className="relative z-10 flex items-center gap-2">
+                    Get Started Free
+                    <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Link>
               </motion.div>
-            );
-          })}
+            </GlowButton>
+            <GlowButton>
+              <motion.a
+                href="#features"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative overflow-hidden px-7 sm:px-8 py-3.5 rounded-2xl glass text-zinc-400 font-medium text-sm sm:text-base hover:text-zinc-200 hover:bg-white/[0.06] hover:border-indigo-500/15 transition-all duration-300 flex items-center gap-2 border border-white/[0.06]"
+              >
+                <FiGrid className="group-hover:scale-110 transition-transform text-sm" />
+                Explore Features
+              </motion.a>
+            </GlowButton>
+          </motion.div>
+
+          <SocialProof />
+          <StatBar />
         </motion.div>
-      </div>
-    </section>
+      </motion.div>
+
+      <ScrollIndicator />
+    </motion.section>
   );
 }

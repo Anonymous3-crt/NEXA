@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FiSend, FiPaperclip, FiMic, FiSmile } from 'react-icons/fi';
+import { FiSend, FiPaperclip, FiMic, FiSmile, FiLoader } from 'react-icons/fi';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { api } from '../../api';
 import EmojiPicker from './EmojiPicker';
 
 export default function MessageComposer() {
   const [text, setText] = useState('');
-  const { sendMessage, emojiPickerOpen, setEmojiPickerOpen } = useDashboard();
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+  const { sendMessage, activeChat, emojiPickerOpen, setEmojiPickerOpen } = useDashboard();
 
   const handleSend = () => {
     if (!text.trim()) return;
@@ -25,6 +28,17 @@ export default function MessageComposer() {
     setText((prev) => prev + emoji);
   };
 
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      await api.upload.file(file, activeChat);
+    } catch { /* toast would go here */ }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
   return (
     <div className="border-t border-white/[0.05] bg-[#0a0a0f]/50 backdrop-blur-sm px-4 sm:px-6 py-3">
       <div className="flex items-end gap-2">
@@ -40,10 +54,12 @@ export default function MessageComposer() {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => fileRef.current?.click()}
             className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all"
           >
-            <FiPaperclip size={18} />
+            {uploading ? <FiLoader className="animate-spin" size={18} /> : <FiPaperclip size={18} />}
           </motion.button>
+          <input ref={fileRef} type="file" onChange={handleFile} className="hidden" />
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}

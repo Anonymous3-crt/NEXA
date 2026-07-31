@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiSave, FiCamera } from 'react-icons/fi';
+import { FiSave, FiCamera, FiLoader } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
@@ -24,6 +24,22 @@ export default function EditProfilePage() {
     phone: currentUser.phone || '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarRef = useRef(null);
+
+  const handleAvatar = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingAvatar(true);
+    try {
+      await api.upload.avatar(file);
+      toast('Photo uploaded!', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+    setUploadingAvatar(false);
+    if (avatarRef.current) avatarRef.current.value = '';
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -60,9 +76,10 @@ export default function EditProfilePage() {
               <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-xl" style={{ background: currentUser.color }}>
                 {currentUser.initials}
               </div>
-              <motion.button whileHover={{ scale: 1.1 }} type="button" className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center shadow-lg border-2 border-[#0a0a0f]">
-                <FiCamera size={12} className="text-white" />
+              <motion.button whileHover={{ scale: 1.1 }} type="button" onClick={() => avatarRef.current?.click()} className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center shadow-lg border-2 border-[#0a0a0f]">
+                {uploadingAvatar ? <FiLoader className="animate-spin" size={12} className="text-white" /> : <FiCamera size={12} className="text-white" />}
               </motion.button>
+              <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatar} className="hidden" />
             </div>
             <div className="text-center sm:text-left">
               <h3 className="text-lg font-semibold text-white">Profile Photo</h3>

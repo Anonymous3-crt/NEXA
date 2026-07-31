@@ -9,10 +9,45 @@ async function request(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
-  return data;
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  } catch (err) {
+    console.error(`[API] Network error: ${path}`, err);
+    throw new Error('Network error. Please check your connection.');
+  }
+
+  console.log(`[API] ${options.method || 'GET'} ${path} → ${res.status} ${res.statusText}`);
+
+  const contentType = res.headers.get('content-type');
+  let body = null;
+
+  if (contentType && contentType.includes('application/json')) {
+    const text = await res.text();
+    if (!text) {
+      console.error(`[API] Empty JSON body for ${path} (${res.status})`);
+      throw new Error(res.status === 500 ? 'Server error. Please try again.' : `Unexpected response (${res.status})`);
+    }
+    try {
+      body = JSON.parse(text);
+    } catch (parseErr) {
+      console.error(`[API] Invalid JSON for ${path}:`, text);
+      throw new Error('Invalid server response. Please try again.');
+    }
+  } else {
+    const text = await res.text();
+    console.error(`[API] Non-JSON response for ${path} (${contentType}):`, text.slice(0, 200));
+    if (res.status === 404) throw new Error('Endpoint not found. Please check the URL.');
+    if (res.status >= 500) throw new Error('Server error. Please try again later.');
+    throw new Error(`Unexpected response (${res.status})`);
+  }
+
+  if (!res.ok) {
+    const message = body?.message || body?.error || `Request failed (${res.status})`;
+    throw new Error(message);
+  }
+
+  return body;
 }
 
 export function setToken(token) {
@@ -38,6 +73,7 @@ export const api = {
     login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
     getMe: () => request('/auth/me'),
     updateMe: (body) => request('/auth/me', { method: 'PUT', body: JSON.stringify(body) }),
+    checkUsername: (username) => request(`/auth/check-username?username=${encodeURIComponent(username)}`),
   },
   conversations: {
     list: () => request('/conversations'),
@@ -68,5 +104,50 @@ export const api = {
   },
   help: {
     list: () => request('/help'),
+  },
+  upload: {
+    file: async (file, conversationId) => {
+      const token = getToken();
+      const form = new FormData();
+      form.append('file', file);
+      if (conversationId) form.append('conversationId', conversationId);
+      let res;
+      try {
+        res = await fetch(`${BASE_URL}/upload/chat`, {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: form,
+        });
+      } catch {
+        throw new Error('Network error. Please check your connection.');
+      }
+      const text = await res.text();
+      if (!text) throw new Error('Empty response from server');
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error('Invalid server response'); }
+      if (!res.ok) throw new Error(data?.message || data?.error || 'Upload failed');
+      return data;
+    },
+    avatar: async (file) => {
+      const token = getToken();
+      const form = new FormData();
+      form.append('file', file);
+      let res;
+      try {
+        res = await fetch(`${BASE_URL}/upload`, {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: form,
+        });
+      } catch {
+        throw new Error('Network error. Please check your connection.');
+      }
+      const text = await res.text();
+      if (!text) throw new Error('Empty response from server');
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error('Invalid server response'); }
+      if (!res.ok) throw new Error(data?.message || data?.error || 'Upload failed');
+      return data;
+    },
   },
 };

@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import { initDb } from './config/db.js';
@@ -18,7 +20,10 @@ import starredRoutes from './routes/starred.js';
 import mediaRoutes from './routes/media.js';
 import callsRoutes from './routes/calls.js';
 import helpRoutes from './routes/help.js';
+import uploadRoutes from './routes/upload.js';
 dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const server = http.createServer(app);
@@ -27,6 +32,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 initDb().then(() => {
   seedDatabase();
@@ -43,6 +49,7 @@ app.use('/api/starred', starredRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/calls', callsRoutes);
 app.use('/api/help', helpRoutes);
+app.use('/api/upload', uploadRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
