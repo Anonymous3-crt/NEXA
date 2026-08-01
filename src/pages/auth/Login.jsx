@@ -16,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   const validate = () => {
     const e = {};
@@ -37,7 +38,13 @@ export default function Login() {
       toast('Welcome back! Redirecting...', 'success');
       setTimeout(() => navigate('/dashboard'), 800);
     } catch (err) {
-      toast(err.message, 'error');
+      if (err.data?.needsVerification) {
+        setNeedsVerification(true);
+        toast(err.message, 'warning');
+      } else {
+        setNeedsVerification(false);
+        toast(err.message, 'error');
+      }
     }
     setLoading(false);
   };
@@ -71,6 +78,18 @@ export default function Login() {
             Forgot password?
           </Link>
         </div>
+
+        {needsVerification && (
+          <div className="flex items-start justify-between gap-3 p-3 rounded-xl bg-amber-500/[0.08] border border-amber-500/15 text-xs text-amber-300">
+            <p>Please verify your email before signing in.</p>
+            <Link
+              to={`/verify-email?email=${encodeURIComponent(form.email)}`}
+              className="shrink-0 font-medium text-amber-200 underline underline-offset-2 hover:text-white"
+            >
+              Verify now
+            </Link>
+          </div>
+        )}
 
         <motion.button
           type="submit"
@@ -112,6 +131,7 @@ export default function Login() {
           <motion.button
             key={label}
             type="button"
+            onClick={() => toast(`${label} sign-in coming soon`, 'info')}
             whileHover={{ scale: 1.03, y: -1 }}
             whileTap={{ scale: 0.98 }}
             className="flex items-center justify-center gap-2 py-3 rounded-2xl glass text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all text-sm"

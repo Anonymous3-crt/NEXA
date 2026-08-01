@@ -24,6 +24,7 @@ export function DashboardProvider({ children }) {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newChatOpen, setNewChatOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -77,6 +78,13 @@ export function DashboardProvider({ children }) {
   }
 
   const selectChat = useCallback((chatId) => {
+    if (!chatId) {
+      setActiveChat(null);
+      setNotifOpen(false);
+      setSettingsOpen(false);
+      setProfileOpen(false);
+      return;
+    }
     setActiveChat(chatId);
     if (!messages[chatId]) loadMessages(chatId);
     setConversations((prev) =>
@@ -87,6 +95,20 @@ export function DashboardProvider({ children }) {
     setProfileOpen(false);
     if (socketRef.current) socketRef.current.emit('join:conversation', chatId);
   }, [messages]);
+
+  const createConversation = useCallback(async ({ name, participantIds, isGroup }) => {
+    try {
+      const data = await api.conversations.create({ name, participantIds, isGroup });
+      const created = data.conversation;
+      setConversations((prev) => [created, ...prev]);
+      selectChat(created.id);
+      toast(`Started "${name}"`, 'success');
+      return created;
+    } catch (err) {
+      toast(err.message || 'Could not create conversation', 'error');
+      throw err;
+    }
+  }, [selectChat, toast]);
 
   const sendMessage = useCallback((text) => {
     if (!activeChat || !text.trim()) return;
@@ -128,7 +150,8 @@ export function DashboardProvider({ children }) {
         sidebarOpen, setSidebarOpen, notifOpen, setNotifOpen,
         settingsOpen, setSettingsOpen, profileOpen, setProfileOpen,
         emojiPickerOpen, setEmojiPickerOpen, searchQuery, setSearchQuery,
-        notifications, markNotifRead,
+        notifications, markNotifRead, newChatOpen, setNewChatOpen, createConversation,
+        loadContacts,
       }}
     >
       {children}

@@ -1,20 +1,21 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiMail, FiArrowLeft } from 'react-icons/fi';
+import { FiMail, FiArrowLeft, FiTerminal } from 'react-icons/fi';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { api } from '../../api';
 
 export default function ForgotPassword() {
   usePageTitle('Forgot Password — Nexa');
-  const navigate = useNavigate();
   const toast = useToast();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [devToken, setDevToken] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,10 +23,15 @@ export default function ForgotPassword() {
     if (!/\S+@\S+\.\S+/.test(email)) { setError('Invalid email'); return; }
     setError('');
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const data = await api.auth.forgotPassword(email);
+      setDevToken(data.devToken || null);
+      setSent(true);
+      toast(data.message || 'Reset link sent!', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
     setLoading(false);
-    setSent(true);
-    toast('Reset link sent! Check your inbox.', 'success');
   };
 
   return (
@@ -74,6 +80,20 @@ export default function ForgotPassword() {
           <p className="text-sm text-zinc-400 mb-6">
             We sent a reset link to <span className="text-zinc-300">{email}</span>
           </p>
+          {devToken && (
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-indigo-500/[0.06] border border-indigo-500/15 text-xs text-indigo-300 text-left mb-6">
+              <FiTerminal className="mt-0.5 shrink-0" size={14} />
+              <div>
+                <p className="font-medium">Development mode — no email sent</p>
+                <Link
+                  to={`/reset-password?token=${devToken}`}
+                  className="text-indigo-200 underline underline-offset-2 hover:text-white"
+                >
+                  Open reset link
+                </Link>
+              </div>
+            </div>
+          )}
           <motion.button
             onClick={() => { setSent(false); setEmail(''); }}
             whileHover={{ scale: 1.02 }}

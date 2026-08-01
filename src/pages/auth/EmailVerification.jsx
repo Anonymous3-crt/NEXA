@@ -1,19 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiMail, FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
+import { FiMail, FiArrowLeft, FiRefreshCw, FiTerminal } from 'react-icons/fi';
 import AuthLayout from '../../components/auth/AuthLayout';
 import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { api, getStoredUser } from '../../api';
 
 export default function EmailVerification() {
   usePageTitle('Verify Email — Nexa');
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get('email') || getStoredUser()?.email || '';
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [timer, setTimer] = useState(30);
+  const [devCode, setDevCode] = useState(null);
   const inputsRef = useRef([]);
 
   useEffect(() => {
@@ -42,19 +46,30 @@ export default function EmailVerification() {
 
   const handleSubmit = async () => {
     if (code.some((c) => !c)) { toast('Please enter the full code', 'error'); return; }
+    if (!email) { toast('Missing email address', 'error'); return; }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 2000));
+    try {
+      await api.auth.verifyEmail(email, code.join(''));
+      toast('Email verified!', 'success');
+      setTimeout(() => navigate('/create-username'), 1200);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
     setLoading(false);
-    toast('Email verified!', 'success');
-    setTimeout(() => navigate('/create-username'), 1200);
   };
 
   const handleResend = async () => {
+    if (!email) { toast('Missing email address', 'error'); return; }
     setResending(true);
-    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      const data = await api.auth.resendVerification(email);
+      if (data.devCode) setDevCode(data.devCode);
+      toast('New code sent!', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
     setResending(false);
     setTimer(30);
-    toast('New code sent!', 'success');
   };
 
   return (
@@ -103,6 +118,16 @@ export default function EmailVerification() {
             'Verify email'
           )}
         </motion.button>
+
+        {(devCode || loading) && devCode && (
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-indigo-500/[0.06] border border-indigo-500/15 text-xs text-indigo-300">
+            <FiTerminal className="mt-0.5 shrink-0" size={14} />
+            <div>
+              <p className="font-medium">Development mode — no email sent</p>
+              <p className="text-indigo-400/80 mt-0.5">Your code: <span className="font-mono font-bold text-indigo-200 tracking-widest">{devCode}</span></p>
+            </div>
+          </div>
+        )}
 
         <div className="text-center">
           {timer > 0 ? (

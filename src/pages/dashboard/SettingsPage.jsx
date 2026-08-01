@@ -3,16 +3,34 @@ import { motion } from 'framer-motion';
 import { FiMoon, FiSun, FiVolume2, FiGlobe, FiMonitor, FiShield, FiUsers, FiLock, FiEye, FiDownload } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 const settingsStore = {
   get(k, def) { const v = localStorage.getItem('nexa_' + k); return v !== null ? JSON.parse(v) : def; },
   set(k, v) { localStorage.setItem('nexa_' + k, JSON.stringify(v)); },
+  clear() {
+    const keys = ['sound_messages', 'sound_calls', 'previews', 'notif_group', 'privacy_receipts', 'privacy_encryption', 'privacy_online', 'privacy_dms', 'motion_reduced'];
+    keys.forEach((k) => localStorage.removeItem('nexa_' + k));
+  },
+};
+
+const DEFAULT_TOGGLES = {
+  messageSounds: true,
+  callSounds: true,
+  messagePreviews: false,
+  groupNotifs: true,
+  readReceipts: true,
+  encryption: true,
+  onlineStatus: true,
+  allowDMs: false,
+  reducedMotion: false,
 };
 
 export default function SettingsPage() {
   usePageTitle('Settings — Nexa');
   const { theme, toggleTheme } = useDashboard();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('general');
   const [toggles, setToggles] = useState(() => ({
     messageSounds: settingsStore.get('sound_messages', true),
@@ -32,6 +50,16 @@ export default function SettingsPage() {
       settingsStore.set(key.replace(/([A-Z])/g, '_$1').toLowerCase(), next[key]);
       return next;
     });
+  };
+
+  const saveSettings = () => {
+    toast('Settings saved', 'success');
+  };
+
+  const resetDefaults = () => {
+    settingsStore.clear();
+    setToggles(DEFAULT_TOGGLES);
+    toast('Settings reset to defaults', 'info');
   };
 
   const tabs = [
@@ -130,10 +158,10 @@ export default function SettingsPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex justify-end gap-3 pt-2">
-          <button className="px-5 py-2.5 rounded-xl glass text-sm text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
+          <button onClick={resetDefaults} className="px-5 py-2.5 rounded-xl glass text-sm text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
             Reset to Defaults
           </button>
-          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
+          <motion.button onClick={saveSettings} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
             Save Settings
           </motion.button>
         </motion.div>

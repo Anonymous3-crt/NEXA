@@ -31,6 +31,19 @@ export async function initDb() {
   const database = await getDb();
   const schema = fs.readFileSync(path.join(__dirname, '..', 'db', 'schema.sql'), 'utf-8');
   database.run(schema);
+  const migrations = [
+    'ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT ""',
+    'ALTER TABLE users ADD COLUMN verification_code TEXT',
+    'ALTER TABLE users ADD COLUMN reset_token TEXT',
+    'ALTER TABLE messages ADD COLUMN attachment TEXT',
+  ];
+  for (const sql of migrations) {
+    try {
+      database.run(sql);
+    } catch {
+      /* column already exists */
+    }
+  }
   saveDb();
   console.log('Database initialized');
 }

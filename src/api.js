@@ -44,7 +44,10 @@ async function request(path, options = {}) {
 
   if (!res.ok) {
     const message = body?.message || body?.error || `Request failed (${res.status})`;
-    throw new Error(message);
+    const err = new Error(message);
+    err.status = res.status;
+    err.data = body;
+    throw err;
   }
 
   return body;
@@ -71,6 +74,10 @@ export const api = {
   auth: {
     signup: (body) => request('/auth/signup', { method: 'POST', body: JSON.stringify(body) }),
     login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+    verifyEmail: (email, code) => request('/auth/verify-email', { method: 'POST', body: JSON.stringify({ email, code }) }),
+    resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: JSON.stringify({ email }) }),
+    forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }),
+    resetPassword: (token, newPassword) => request('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, newPassword }) }),
     getMe: () => request('/auth/me'),
     updateMe: (body) => request('/auth/me', { method: 'PUT', body: JSON.stringify(body) }),
     checkUsername: (username) => request(`/auth/check-username?username=${encodeURIComponent(username)}`),
@@ -85,6 +92,7 @@ export const api = {
   },
   contacts: {
     list: () => request('/contacts'),
+    add: (email) => request('/contacts', { method: 'POST', body: JSON.stringify({ email }) }),
   },
   notifications: {
     list: () => request('/notifications'),
@@ -92,15 +100,19 @@ export const api = {
   },
   archived: {
     list: () => request('/archived'),
+    create: (conversationId) => request('/archived', { method: 'POST', body: JSON.stringify({ conversationId }) }),
+    unarchive: (id) => request(`/archived/${id}`, { method: 'DELETE' }),
   },
   starred: {
     list: () => request('/starred'),
+    toggle: (body) => request('/starred/toggle', { method: 'POST', body: JSON.stringify(body) }),
   },
   media: {
     list: () => request('/media'),
   },
   calls: {
     list: () => request('/calls'),
+    create: (body) => request('/calls', { method: 'POST', body: JSON.stringify(body) }),
   },
   help: {
     list: () => request('/help'),

@@ -1,16 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiLock, FiArrowLeft } from 'react-icons/fi';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { api } from '../../api';
 
 export default function ResetPassword() {
   usePageTitle('Reset Password — Nexa');
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') || '';
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ password: '', confirm: '' });
   const [errors, setErrors] = useState({});
@@ -27,11 +30,16 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    if (!token) { toast('Missing reset token', 'error'); return; }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      await api.auth.resetPassword(token, form.password);
+      toast('Password reset successfully!', 'success');
+      setTimeout(() => navigate('/login'), 1500);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
     setLoading(false);
-    toast('Password reset successfully!', 'success');
-    setTimeout(() => navigate('/login'), 1500);
   };
 
   return (

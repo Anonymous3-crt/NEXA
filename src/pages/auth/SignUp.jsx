@@ -37,8 +37,8 @@ export default function SignUp() {
       const data = await api.auth.signup({ name: form.name, email: form.email, password: form.password });
       setToken(data.token);
       setStoredUser(data.user);
-      toast('Account created! Redirecting...', 'success');
-      setTimeout(() => navigate('/dashboard'), 800);
+      toast('Account created! Verify your email to continue.', 'success');
+      setTimeout(() => navigate(`/verify-email?email=${encodeURIComponent(form.email)}`), 800);
     } catch (err) {
       toast(err.message, 'error');
     }
@@ -125,6 +125,7 @@ export default function SignUp() {
           <motion.button
             key={label}
             type="button"
+            onClick={() => toast(`${label} sign-in coming soon`, 'info')}
             whileHover={{ scale: 1.03, y: -1 }}
             whileTap={{ scale: 0.98 }}
             className="flex items-center justify-center gap-2 py-3 rounded-2xl glass text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all text-sm"

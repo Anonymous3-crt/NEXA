@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id TEXT NOT NULL,
   sender_id TEXT NOT NULL,
   text TEXT NOT NULL,
+  attachment TEXT,
   created_at TEXT DEFAULT (datetime('now')),
   FOREIGN KEY (conversation_id) REFERENCES conversations(id),
   FOREIGN KEY (sender_id) REFERENCES users(id)

@@ -1,9 +1,23 @@
 import { motion } from 'framer-motion';
-import { FiMoreHorizontal, FiPhone, FiVideo, FiInfo, FiArrowLeft } from 'react-icons/fi';
+import { FiMoreHorizontal, FiPhone, FiVideo, FiInfo, FiArrowLeft, FiArchive } from 'react-icons/fi';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { useToast } from '../ui/Toast';
+import { api } from '../../api';
 
 export default function ChatHeader({ chat }) {
-  const { setSidebarOpen, currentUser } = useDashboard();
+  const { setSidebarOpen, activeChat, setConversations, selectChat } = useDashboard();
+  const toast = useToast();
+
+  const archiveChat = async () => {
+    try {
+      await api.archived.create(activeChat);
+      setConversations((prev) => prev.filter((c) => c.id !== activeChat));
+      selectChat(null);
+      toast('Conversation archived', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+  };
 
   return (
     <div className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-white/[0.05] bg-[#0a0a0f]/50 backdrop-blur-sm">
@@ -40,7 +54,7 @@ export default function ChatHeader({ chat }) {
         </div>
       </div>
       <div className="flex items-center gap-1">
-        {[FiPhone, FiVideo, FiInfo, FiMoreHorizontal].map((Icon, i) => (
+        {[FiPhone, FiVideo, FiInfo].map((Icon, i) => (
           <motion.button
             key={i}
             whileHover={{ scale: 1.1 }}
@@ -50,6 +64,22 @@ export default function ChatHeader({ chat }) {
             <Icon size={16} />
           </motion.button>
         ))}
+        <motion.button
+          onClick={archiveChat}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all"
+          aria-label="Archive conversation"
+        >
+          <FiArchive size={16} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all"
+        >
+          <FiMoreHorizontal size={16} />
+        </motion.button>
       </div>
     </div>
   );

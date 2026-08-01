@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { dbAll } from '../config/db.js';
+import { dbGet, dbAll, dbRun } from '../config/db.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
@@ -15,6 +15,21 @@ router.get('/', (req, res) => {
   `, [req.userId]);
 
   res.json({ contacts });
+});
+
+router.post('/', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  const user = dbGet('SELECT id, name, email, initials, color, username FROM users WHERE LOWER(email) = LOWER(?)', [email]);
+  if (!user) return res.status(404).json({ error: 'No Nexa user found with that email' });
+  if (user.id === req.userId) return res.status(400).json({ error: 'You cannot add yourself' });
+
+  const existing = dbGet('SELECT 1 as ok FROM contacts WHERE user_id = ? AND contact_user_id = ?', [req.userId, user.id]);
+  if (existing) return res.status(409).json({ error: 'Already in your contacts' });
+
+  dbRun('INSERT INTO contacts VALUES (?,?,?)', [req.userId, user.id, new Date().toISOString()]);
+  res.status(201).json({ contact: user });
 });
 
 export default router;

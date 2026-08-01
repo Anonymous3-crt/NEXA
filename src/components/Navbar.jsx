@@ -10,27 +10,34 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigat
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('');
   const { setOpen } = useCommandPalette();
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 40);
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      setScrollProgress(total > 0 ? Math.min(window.scrollY / total, 1) : 0);
-
-      const sections = navLinks.map((l) => l.href.replace('#', ''));
-      for (const id of sections.reverse()) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 200) {
-          setActiveSection(id);
-          break;
-        }
-      }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length === 0) return;
+        const top = visible.reduce((a, b) =>
+          a.boundingClientRect.top < b.boundingClientRect.top ? a : b
+        );
+        setActiveSection(top.target.id);
+      },
+      { rootMargin: '-15% 0px -55% 0px', threshold: 0 }
+    );
+    for (const link of navLinks) {
+      const el = document.getElementById(link.href.replace('#', ''));
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -44,15 +51,6 @@ export default function Navbar() {
           : 'bg-transparent'
       }`}
     >
-      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/[0.03] overflow-hidden">
-        <motion.div
-          className="relative h-full aurora-progress"
-          style={{ scaleX: scrollProgress, transformOrigin: 'left' }}
-        >
-          <span className="progress-shine" />
-        </motion.div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           <Link to="/" className="flex items-center gap-2.5 group">
@@ -76,20 +74,13 @@ export default function Navbar() {
                   key={link.label}
                   href={link.href}
                   aria-current={isActive ? 'true' : undefined}
-                  className={`relative px-4 py-2 text-sm rounded-xl transition-all duration-300 ${
+                  className={`px-4 py-2 text-sm rounded-xl transition-all duration-300 ${
                     isActive
-                      ? 'text-white'
+                      ? 'text-indigo-300 font-medium'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
                   {link.label}
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-active"
-                      className="absolute inset-0 rounded-xl bg-white/[0.06]"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
                 </a>
               );
             })}

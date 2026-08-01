@@ -3,8 +3,9 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuid } from 'uuid';
-import { dbRun } from '../config/db.js';
+import { dbGet, dbRun } from '../config/db.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { getIO } from '../socket.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
@@ -49,15 +50,36 @@ router.post('/chat', authMiddleware, upload.single('file'), (req, res) => {
   const { conversationId } = req.body;
   if (!conversationId) return res.status(400).json({ error: 'conversationId required' });
 
+  const isMember = dbGet('SELECT 1 as ok FROM conversation_participants WHERE conversation_id = ? AND user_id = ?', [conversationId, req.userId]);
+  if (!isMember) return res.status(403).json({ error: 'Not a member' });
+
   const id = uuid();
+  const messageId = uuid();
+  const now = new Date().toISOString();
   const name = req.file.originalname;
   const type = req.file.mimetype.startsWith('image/') ? 'image' : req.file.mimetype.startsWith('video/') ? 'video' : 'document';
   const size = `${(req.file.size / 1024 / 1024).toFixed(1)} MB`;
-  const preview = type === 'image' ? '🖼️' : type === 'video' ? '🎥' : '📄';
+  const attachment = { type, name, size, url: `/uploads/${req.file.filename}` };
 
-  dbRun('INSERT INTO media_files VALUES (?,?,?,?,?,?,?,?)', [id, conversationId, req.userId, name, type, size, preview, new Date().toISOString()]);
+  dbRun('INSERT INTO media_files VALUES (?,?,?,?,?,?,?,?)', [id, conversationId, req.userId, name, type, size, type === 'image' ? '🖼️' : type === 'video' ? '🎥' : '📄', now]);
+  dbRun('INSERT INTO messages (id, conversation_id, sender_id, text, attachment, created_at) VALUES (?,?,?,?,?,?)', [messageId, conversationId, req.userId, name, JSON.stringify(attachment), now]);
 
-  res.json({ file: { id, name, type, size, preview, url: `/uploads/${req.file.filename}` } });
+  const sender = dbGet('SELECT id, name, initials, color FROM users WHERE id = ?', [req.userId]);
+  const message = {
+    id: messageId,
+    conversation_id: conversationId,
+    sender_id: req.userId,
+    text: name,
+    attachment: JSON.stringify(attachment),
+    created_at: now,
+    name: sender.name,
+    initials: sender.initials,
+    color: sender.color,
+  };
+
+  getIO()?.to(`conv:${conversationId}`).emit('message:new', message);
+
+  res.json({ message });
 });
 
 export default router;

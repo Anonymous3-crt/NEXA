@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FiSend, FiPaperclip, FiMic, FiSmile, FiLoader } from 'react-icons/fi';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { useToast } from '../ui/Toast';
 import { api } from '../../api';
 import EmojiPicker from './EmojiPicker';
 
@@ -9,6 +10,7 @@ export default function MessageComposer() {
   const [text, setText] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
+  const toast = useToast();
   const { sendMessage, activeChat, emojiPickerOpen, setEmojiPickerOpen } = useDashboard();
 
   const handleSend = () => {
@@ -30,11 +32,14 @@ export default function MessageComposer() {
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !activeChat) return;
     setUploading(true);
     try {
       await api.upload.file(file, activeChat);
-    } catch { /* toast would go here */ }
+      toast('File sent', 'success');
+    } catch (err) {
+      toast(err.message || 'Upload failed', 'error');
+    }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = '';
   };

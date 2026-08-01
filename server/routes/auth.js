@@ -6,6 +6,16 @@ import { generateToken, authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
 
+const isProd = process.env.NODE_ENV === 'production';
+
+function generateCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function devOnly(value) {
+  return isProd ? undefined : value;
+}
+
 router.post('/signup', (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
@@ -23,11 +33,79 @@ router.post('/signup', (req, res) => {
   const colors = ['#6366f1', '#8b5cf6', '#06b6d4', '#ec4899', '#f59e0b', '#10b981'];
   const color = colors[Math.floor(Math.random() * colors.length)];
   const password_hash = bcrypt.hashSync(password, 10);
+  const verificationCode = generateCode();
 
-  dbRun('INSERT INTO users (id, name, email, password_hash, initials, color) VALUES (?,?,?,?,?,?)', [id, name, email, password_hash, initials, color]);
+  dbRun('INSERT INTO users (id, name, email, password_hash, initials, color, verification_code) VALUES (?,?,?,?,?,?,?)', [id, name, email, password_hash, initials, color, verificationCode]);
+  console.log(`[DEV] Verification code for ${email}: ${verificationCode}`);
 
   const token = generateToken(id);
-  res.status(201).json({ success: true, message: 'Account created successfully', token, user: { id, name, email, initials, color, username: null } });
+  res.status(201).json({
+    success: true,
+    message: 'Account created. Verify your email to continue.',
+    token,
+    user: { id, name, email, initials, color, username: null, verified: 0 },
+    devCode: devOnly(verificationCode),
+  });
+});
+
+router.post('/verify-email', (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) return res.status(400).json({ success: false, message: 'Email and code are required' });
+
+  const user = dbGet('SELECT id, verification_code, verified FROM users WHERE email = ?', [email]);
+  if (!user) return res.status(404).json({ success: false, message: 'No account found for this email' });
+  if (user.verified === 1) return res.json({ success: true, message: 'Email already verified' });
+  if (!user.verification_code || user.verification_code !== String(code)) {
+    return res.status(400).json({ success: false, message: 'Invalid or expired code' });
+  }
+
+  dbRun('UPDATE users SET verified = 1, verification_code = NULL WHERE id = ?', [user.id]);
+  res.json({ success: true, message: 'Email verified successfully' });
+});
+
+router.post('/resend-verification', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+  const user = dbGet('SELECT id, verified FROM users WHERE email = ?', [email]);
+  if (!user) return res.status(404).json({ success: false, message: 'No account found for this email' });
+  if (user.verified === 1) return res.status(400).json({ success: false, message: 'Email already verified' });
+
+  const code = generateCode();
+  dbRun('UPDATE users SET verification_code = ? WHERE id = ?', [code, user.id]);
+  console.log(`[DEV] Verification code for ${email}: ${code}`);
+
+  res.json({ success: true, message: 'New code sent', devCode: devOnly(code) });
+});
+
+router.post('/forgot-password', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+  const user = dbGet('SELECT id FROM users WHERE email = ?', [email]);
+  if (!user) {
+    return res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+  }
+
+  const resetToken = uuid();
+  dbRun('UPDATE users SET reset_token = ? WHERE id = ?', [resetToken, user.id]);
+  console.log(`[DEV] Password reset for ${email}: http://localhost:3001/reset-password?token=${resetToken}`);
+
+  res.json({ success: true, message: 'If that email exists, a reset link has been sent.', devToken: devOnly(resetToken) });
+});
+
+router.post('/reset-password', (req, res) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword) return res.status(400).json({ success: false, message: 'Token and new password are required' });
+  if (newPassword.length < 8) return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+
+  const user = dbGet('SELECT id FROM users WHERE reset_token = ?', [token]);
+  if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired reset link' });
+
+  const password_hash = bcrypt.hashSync(newPassword, 10);
+  dbRun('UPDATE users SET password_hash = ?, reset_token = NULL WHERE id = ?', [password_hash, user.id]);
+
+  res.json({ success: true, message: 'Password reset successfully' });
 });
 
 router.post('/login', (req, res) => {
@@ -46,6 +124,10 @@ router.post('/login', (req, res) => {
 
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ success: false, message: 'Invalid email or password' });
+  }
+
+  if (user.verified !== 1) {
+    return res.status(403).json({ success: false, message: 'Please verify your email before signing in', needsVerification: true });
   }
 
   const token = generateToken(user.id);
@@ -73,7 +155,7 @@ router.get('/me', authMiddleware, (req, res) => {
 });
 
 router.put('/me', authMiddleware, (req, res) => {
-  const { name, username, bio, company, location, website, phone } = req.body;
+  const { name, username, bio, company, location, website, phone, avatar } = req.body;
 
   if (username) {
     const existing = dbGet('SELECT id FROM users WHERE username = ? AND id != ?', [username, req.userId]);
@@ -87,8 +169,9 @@ router.put('/me', authMiddleware, (req, res) => {
     company = COALESCE(?, company),
     location = COALESCE(?, location),
     website = COALESCE(?, website),
-    phone = COALESCE(?, phone)
-    WHERE id = ?`, [name || null, username || null, bio ?? null, company ?? null, location ?? null, website ?? null, phone ?? null, req.userId]);
+    phone = COALESCE(?, phone),
+    avatar = COALESCE(?, avatar)
+    WHERE id = ?`, [name || null, username || null, bio ?? null, company ?? null, location ?? null, website ?? null, phone ?? null, avatar || null, req.userId]);
 
   const user = dbGet(`SELECT ${userFields} FROM users WHERE id = ?`, [req.userId]);
   res.json({ success: true, user });

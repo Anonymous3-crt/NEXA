@@ -3,13 +3,28 @@ import { motion } from 'framer-motion';
 import { FiStar } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { api } from '../../api';
+import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function StarredPage() {
   usePageTitle('Starred — Nexa');
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState(null);
   useEffect(() => { api.starred.list().then(d => setItems(d.starred || [])).catch(() => {}).finally(() => setLoading(false)); }, []);
+
+  const unstar = async (msg) => {
+    setBusyId(msg.id);
+    try {
+      await api.starred.toggle({ conversationId: msg.conversation_id, senderId: msg.sender_id, text: msg.text });
+      setItems((prev) => prev.filter((i) => i.id !== msg.id));
+      toast('Message unstarred', 'info');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+    setBusyId(null);
+  };
   if (loading) return null;
   if (items.length === 0) {
     return (
@@ -46,10 +61,19 @@ export default function StarredPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-white">{msg.sender_name}</span>
                     <span className="text-[10px] text-zinc-600">in</span>
-                    <span className="text-xs text-indigo-400">{msg.conversation_id ? msg.conversation_id.slice(0, 8) : 'Chat'}</span>
+                    <span className="text-xs text-indigo-400">{msg.conversation_name || 'Chat'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FiStar className="text-amber-400 fill-amber-400 text-xs" />
+                    <motion.button
+                      onClick={() => unstar(msg)}
+                      disabled={busyId === msg.id}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-1.5 rounded-lg text-amber-400 hover:bg-white/[0.06] transition-all disabled:opacity-50"
+                      aria-label="Unstar message"
+                    >
+                      <FiStar className="fill-amber-400" size={13} />
+                    </motion.button>
                     <span className="text-[10px] text-zinc-600">{msg.created_at ? new Date(msg.created_at).toLocaleDateString() : ''}</span>
                   </div>
                 </div>

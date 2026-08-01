@@ -2,18 +2,19 @@ import { useEffect } from 'react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiMenu, FiMessageCircle, FiBell, FiSettings, FiUser } from 'react-icons/fi';
+import { FiMenu, FiMessageCircle, FiSettings, FiUser } from 'react-icons/fi';
 import { DashboardProvider, useDashboard } from '../contexts/DashboardContext';
 import Sidebar from '../components/dashboard/Sidebar';
 import ChatWindow from '../components/dashboard/ChatWindow';
 import NotificationCenter from '../components/dashboard/NotificationCenter';
 import SettingsDrawer from '../components/dashboard/SettingsDrawer';
 import UserProfileCard from '../components/dashboard/UserProfileCard';
+import NewChatModal from '../components/dashboard/NewChatModal';
 
 function DashboardInner() {
   const {
-    currentUser, sidebarOpen, setSidebarOpen,
-    settingsOpen, setSettingsOpen, profileOpen, setProfileOpen,
+    currentUser, setSidebarOpen,
+    setSettingsOpen, setProfileOpen,
     notifOpen, setNotifOpen,
   } = useDashboard();
 
@@ -75,6 +76,7 @@ function DashboardInner() {
 
       <SettingsDrawer />
       <UserProfileCard />
+      <NewChatModal />
     </div>
   );
 }

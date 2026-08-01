@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
-import { FiSearch, FiMessageCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiEdit } from 'react-icons/fi';
 import { useDashboard } from '../../contexts/DashboardContext';
 import ChatList from './ChatList';
 import SearchBar from './SearchBar';
 
 export default function Sidebar() {
-  const { sidebarOpen } = useDashboard();
+  const { sidebarOpen, setNewChatOpen } = useDashboard();
 
   return (
     <motion.aside
@@ -20,6 +20,13 @@ export default function Sidebar() {
             <FiMessageCircle className="text-white text-sm" />
           </div>
           <span className="text-lg font-bold text-white tracking-tight">Nexa</span>
+          <button
+            onClick={() => setNewChatOpen(true)}
+            className="ml-auto w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:shadow-lg transition-all"
+            aria-label="New chat"
+          >
+            <FiEdit size={15} />
+          </button>
         </div>
         <SearchBar />
         <ChatList />

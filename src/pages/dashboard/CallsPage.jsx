@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FiPhone, FiPhoneIncoming, FiPhoneOutgoing, FiVideo } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { api } from '../../api';
+import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 const iconMap = {
@@ -25,9 +26,23 @@ const labelMap = {
 
 export default function CallsPage() {
   usePageTitle('Calls — Nexa');
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [calling, setCalling] = useState(false);
   useEffect(() => { api.calls.list().then(d => setItems(d.calls || [])).catch(() => {}).finally(() => setLoading(false)); }, []);
+
+  const newCall = async () => {
+    setCalling(true);
+    try {
+      const data = await api.calls.create({ type: 'outgoing' });
+      setItems((prev) => [data.call, ...prev]);
+      toast(`Calling ${data.call.name}…`, 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+    setCalling(false);
+  };
   if (loading) return null;
   if (items.length === 0) {
     return (
@@ -48,9 +63,15 @@ export default function CallsPage() {
       title="Calls"
       subtitle="Call history"
       action={
-        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all">
+        <motion.button
+          onClick={newCall}
+          disabled={calling}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-60"
+        >
           <FiPhone size={14} />
-          New Call
+          {calling ? 'Calling…' : 'New Call'}
         </motion.button>
       }
     >

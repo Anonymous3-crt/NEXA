@@ -10,6 +10,12 @@ export default function NotificationsPage() {
   const { notifications, markNotifRead } = useDashboard();
   const [filter, setFilter] = useState('all');
   const filters = ['all', 'unread', 'mentions', 'system'];
+  const filtered = notifications.filter((n) => {
+    if (filter === 'unread') return !n.read;
+    if (filter === 'mentions') return n.type === 'mention';
+    if (filter === 'system') return n.type === 'system';
+    return true;
+  });
 
   return (
     <DashboardSubLayout

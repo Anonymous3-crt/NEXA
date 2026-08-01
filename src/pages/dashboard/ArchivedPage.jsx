@@ -3,13 +3,28 @@ import { motion } from 'framer-motion';
 import { FiArchive, FiUsers } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { api } from '../../api';
+import { useToast } from '../../components/ui/Toast';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function ArchivedPage() {
   usePageTitle('Archived — Nexa');
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState(null);
   useEffect(() => { api.archived.list().then(d => setItems(d.archived || [])).catch(() => {}).finally(() => setLoading(false)); }, []);
+
+  const unarchive = async (item) => {
+    setBusyId(item.id);
+    try {
+      await api.archived.unarchive(item.id);
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+      toast('Conversation unarchived', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+    setBusyId(null);
+  };
   if (loading) return null;
   if (items.length === 0) {
     return (
@@ -56,8 +71,14 @@ export default function ArchivedPage() {
                   </span>
                 </div>
               </div>
-              <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="px-3 py-1.5 rounded-lg glass text-xs text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
-                Unarchive
+              <motion.button
+                onClick={() => unarchive(chat)}
+                disabled={busyId === chat.id}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-3 py-1.5 rounded-lg glass text-xs text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-50"
+              >
+                {busyId === chat.id ? 'Unarchiving…' : 'Unarchive'}
               </motion.button>
             </div>
           </motion.div>

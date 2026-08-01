@@ -3,13 +3,13 @@ import cors from 'cors';
 import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import { initDb } from './config/db.js';
 import { seedDatabase } from './db/seed.js';
 import { verifyToken } from './middleware/auth.js';
 import { dbGet, dbRun } from './config/db.js';
 import { v4 as uuid } from 'uuid';
+import { initSocket } from './socket.js';
 import authRoutes from './routes/auth.js';
 import conversationsRoutes from './routes/conversations.js';
 import messagesRoutes from './routes/messages.js';
@@ -27,7 +27,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+const io = initSocket(server);
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
