@@ -6,8 +6,8 @@ import { authMiddleware } from '../middleware/auth.js';
 const router = Router();
 router.use(authMiddleware);
 
-router.get('/', (req, res) => {
-  const items = dbAll(`
+router.get('/', async (req, res) => {
+  const items = await dbAll(`
     SELECT c.*, u.name, u.initials, u.color
     FROM call_logs c
     JOIN users u ON u.id = c.caller_id
@@ -17,9 +17,9 @@ router.get('/', (req, res) => {
   res.json({ calls: items });
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { type = 'outgoing', duration = '0:42' } = req.body;
-  const contact = dbGet(`
+  const contact = await dbGet(`
     SELECT u.id, u.name, u.initials, u.color
     FROM contacts c
     JOIN users u ON u.id = c.contact_user_id
@@ -29,7 +29,7 @@ router.post('/', (req, res) => {
   if (!contact) return res.status(400).json({ error: 'No contacts to call yet' });
 
   const id = uuid();
-  dbRun('INSERT INTO call_logs VALUES (?,?,?,?,?,?,?,?,?)', [id, req.userId, contact.id, type, duration, 0, 0, 0, new Date().toISOString()]);
+  await dbRun('INSERT INTO call_logs VALUES (?,?,?,?,?,?,?,?,?)', [id, req.userId, contact.id, type, duration, 0, 0, 0, new Date().toISOString()]);
 
   res.status(201).json({ call: { id, ...contact, type, duration, missed: 0, group_call: 0, ai_call: 0, created_at: new Date().toISOString() } });
 });

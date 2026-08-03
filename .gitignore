@@ -1,4 +1,5 @@
 server/db/nexa.db
+.env
 .env.local
 *.log
 

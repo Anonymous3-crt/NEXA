@@ -48,6 +48,30 @@ export function DashboardProvider({ children }) {
     return () => { socket.off('message:new', handler); };
   }, [socket]);
 
+  useEffect(() => {
+    if (!activeChat || socketRef.current?.connected) return;
+    let active = true;
+    const poll = async () => {
+      try {
+        const data = await api.messages.list(activeChat);
+        if (!active) return;
+        setMessages((prev) => {
+          const existing = prev[activeChat] || [];
+          const serverIds = new Set((data.messages || []).map((m) => m.id));
+          const merged = [
+            ...existing.filter((m) => !serverIds.has(m.id) && m.pending),
+            ...(data.messages || []),
+          ];
+          if (merged.length === existing.length) return prev;
+          return { ...prev, [activeChat]: merged };
+        });
+      } catch { /* ok */ }
+    };
+    poll();
+    const timer = setInterval(poll, 3000);
+    return () => { active = false; clearInterval(timer); };
+  }, [activeChat, socket]);
+
   async function loadConversations() {
     try {
       const data = await api.conversations.list();
@@ -93,7 +117,7 @@ export function DashboardProvider({ children }) {
     setNotifOpen(false);
     setSettingsOpen(false);
     setProfileOpen(false);
-    if (socketRef.current) socketRef.current.emit('join:conversation', chatId);
+    if (socketRef.current?.connected) socketRef.current.emit('join:conversation', chatId);
   }, [messages]);
 
   const createConversation = useCallback(async ({ name, participantIds, isGroup }) => {
@@ -110,15 +134,50 @@ export function DashboardProvider({ children }) {
     }
   }, [selectChat, toast]);
 
-  const sendMessage = useCallback((text) => {
+  const sendMessage = useCallback(async (text) => {
     if (!activeChat || !text.trim()) return;
     const trimmed = text.trim();
-    if (socketRef.current) {
+
+    if (socketRef.current?.connected) {
       socketRef.current.emit('message:send', { conversationId: activeChat, text: trimmed });
-    } else {
-      toast('Not connected to server', 'error');
+      return;
     }
-  }, [activeChat]);
+
+    const tempId = `temp-${Date.now()}`;
+    setMessages((prev) => ({
+      ...prev,
+      [activeChat]: [...(prev[activeChat] || []), {
+        id: tempId,
+        conversation_id: activeChat,
+        sender_id: currentUser?.id,
+        text: trimmed,
+        created_at: new Date().toISOString(),
+        pending: true,
+      }],
+    }));
+
+    try {
+      const data = await api.messages.send(activeChat, trimmed);
+      setMessages((prev) => ({
+        ...prev,
+        [activeChat]: (prev[activeChat] || []).map((m) => (m.id === tempId ? data.message : m)),
+      }));
+    } catch (err) {
+      setMessages((prev) => ({
+        ...prev,
+        [activeChat]: (prev[activeChat] || []).filter((m) => m.id !== tempId),
+      }));
+      toast(err.message || 'Could not send message', 'error');
+    }
+  }, [activeChat, currentUser, toast]);
+
+  const appendMessage = useCallback((message) => {
+    setMessages((prev) => {
+      const existing = prev[message.conversation_id] || [];
+      if (existing.some((m) => m.id === message.id)) return prev;
+      return { ...prev, [message.conversation_id]: [...existing, message] };
+    });
+  }, []);
 
   const markNotifRead = useCallback(async (id) => {
     try {
@@ -151,7 +210,7 @@ export function DashboardProvider({ children }) {
         settingsOpen, setSettingsOpen, profileOpen, setProfileOpen,
         emojiPickerOpen, setEmojiPickerOpen, searchQuery, setSearchQuery,
         notifications, markNotifRead, newChatOpen, setNewChatOpen, createConversation,
-        loadContacts,
+        loadContacts, appendMessage,
       }}
     >
       {children}

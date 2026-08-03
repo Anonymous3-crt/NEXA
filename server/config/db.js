@@ -2,14 +2,22 @@ import initSqlJs from 'sql.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { createClient } from '@libsql/client';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_PATH = path.join(__dirname, '..', 'db', 'nexa.db');
 
+const isRemote = !!process.env.TURSO_URL;
 let db = null;
+let remote = null;
+let ready = null;
 
-export async function getDb() {
-  if (db) return db;
+function ensureInit() {
+  if (!ready) ready = initDb();
+  return ready;
+}
+
+async function initLocal() {
   const SQL = await initSqlJs();
   if (fs.existsSync(DB_PATH)) {
     const buffer = fs.readFileSync(DB_PATH);
@@ -18,19 +26,32 @@ export async function getDb() {
     db = new SQL.Database();
   }
   db.run('PRAGMA foreign_keys = ON');
-  return db;
 }
 
-export function saveDb() {
+async function initRemote() {
+  remote = createClient({
+    url: process.env.TURSO_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  });
+  await remote.execute('PRAGMA foreign_keys = ON');
+}
+
+function saveLocal() {
   if (!db) return;
   const data = db.export();
   fs.writeFileSync(DB_PATH, Buffer.from(data));
 }
 
 export async function initDb() {
-  const database = await getDb();
+  if (isRemote) {
+    await initRemote();
+  } else {
+    await initLocal();
+  }
+
   const schema = fs.readFileSync(path.join(__dirname, '..', 'db', 'schema.sql'), 'utf-8');
-  database.run(schema);
+  await dbRunSchema(schema);
+
   const migrations = [
     'ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT ""',
     'ALTER TABLE users ADD COLUMN verification_code TEXT',
@@ -39,34 +60,66 @@ export async function initDb() {
   ];
   for (const sql of migrations) {
     try {
-      database.run(sql);
+      await dbRunSchema(sql);
     } catch {
       /* column already exists */
     }
   }
-  saveDb();
+
+  if (!isRemote) saveLocal();
   console.log('Database initialized');
 }
 
+async function dbRunSchema(sql) {
+  if (isRemote) {
+    await remote.execute(sql);
+  } else {
+    db.run(sql);
+  }
+}
+
 export function dbGet(sql, params = []) {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  let row = null;
-  if (stmt.step()) row = stmt.getAsObject();
-  stmt.free();
-  return row;
+  return ensureInit().then(() => {
+    if (isRemote) {
+      return remote.execute({ sql, args: params }).then((r) => r.rows[0] ?? null);
+    }
+    const stmt = db.prepare(sql);
+    stmt.bind(params);
+    let row = null;
+    if (stmt.step()) row = stmt.getAsObject();
+    stmt.free();
+    return row;
+  });
 }
 
 export function dbAll(sql, params = []) {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  const rows = [];
-  while (stmt.step()) rows.push(stmt.getAsObject());
-  stmt.free();
-  return rows;
+  return ensureInit().then(() => {
+    if (isRemote) {
+      return remote.execute({ sql, args: params }).then((r) => r.rows);
+    }
+    const stmt = db.prepare(sql);
+    stmt.bind(params);
+    const rows = [];
+    while (stmt.step()) rows.push(stmt.getAsObject());
+    stmt.free();
+    return rows;
+  });
 }
 
 export function dbRun(sql, params = []) {
-  db.run(sql, params);
-  saveDb();
+  return ensureInit().then(() => {
+    if (isRemote) {
+      return remote.execute({ sql, args: params });
+    }
+    db.run(sql, params);
+    saveLocal();
+  });
+}
+
+export async function seedIfEmpty() {
+  const row = await dbGet('SELECT COUNT(*) as count FROM users');
+  if (!row || row.count === 0) {
+    const { seedDatabase } = await import('../db/seed.js');
+    await seedDatabase();
+  }
 }

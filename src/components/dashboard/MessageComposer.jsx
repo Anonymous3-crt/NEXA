@@ -11,7 +11,7 @@ export default function MessageComposer() {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
   const toast = useToast();
-  const { sendMessage, activeChat, emojiPickerOpen, setEmojiPickerOpen } = useDashboard();
+  const { sendMessage, activeChat, appendMessage, emojiPickerOpen, setEmojiPickerOpen } = useDashboard();
 
   const handleSend = () => {
     if (!text.trim()) return;
@@ -35,7 +35,8 @@ export default function MessageComposer() {
     if (!file || !activeChat) return;
     setUploading(true);
     try {
-      await api.upload.file(file, activeChat);
+      const data = await api.upload.file(file, activeChat);
+      appendMessage(data.message);
       toast('File sent', 'success');
     } catch (err) {
       toast(err.message || 'Upload failed', 'error');
