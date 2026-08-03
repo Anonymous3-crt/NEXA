@@ -1,7 +1,7 @@
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiMessageCircle, FiHeart, FiZap, FiShield, FiGlobe, FiArrowRight } from 'react-icons/fi';
+import { FiHeart, FiZap, FiShield, FiGlobe, FiArrowRight } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 

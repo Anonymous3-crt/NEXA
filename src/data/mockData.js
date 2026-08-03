@@ -1,6 +1,6 @@
 import {
-  FiMessageSquare, FiShield, FiZap, FiUsers, FiGlobe, FiLayers,
-  FiCamera, FiHeadphones, FiShare2, FiFolder, FiMonitor,
+  FiMessageSquare, FiShield, FiUsers,
+  FiCamera, FiFolder, FiMonitor,
   FiSlack, FiGitBranch, FiTerminal, FiCloud, FiDatabase, FiLock,
 } from 'react-icons/fi';
 

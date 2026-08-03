@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { createClient } from '@libsql/client';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, '..', 'db', 'nexa.db');
+const DB_PATH = process.env.NEXA_DB_PATH || path.join(__dirname, '..', 'db', 'nexa.db');
 
 const isRemote = !!process.env.TURSO_URL;
 let db = null;

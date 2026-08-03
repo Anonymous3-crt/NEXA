@@ -12,10 +12,6 @@ const itemVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
 };
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-};
 
 const glowPulse = {
   animate: {
@@ -73,8 +69,6 @@ function TypewriterText({ text, className }) {
 
   useEffect(() => {
     if (!text) return;
-    setDisplayed('');
-    setDone(false);
     let i = 0;
     const interval = setInterval(() => {
       setDisplayed(text.slice(0, i + 1));
@@ -89,29 +83,6 @@ function TypewriterText({ text, className }) {
       {displayed}
       {!done && <motion.span className="inline-block w-[2px] h-[1em] ml-0.5 bg-indigo-400" animate={{ opacity: [1, 0] }} transition={{ duration: 0.8, repeat: Infinity }} />}
     </span>
-  );
-}
-
-function FloatingBadge({ icon: Icon, label, value, position, delay = 0, color = 'indigo' }) {
-  const colorMap = {
-    indigo: { bg: 'rgba(99,102,241,0.06)', border: 'rgba(99,102,241,0.1)', text: 'rgba(167,139,250,0.5)', icon: 'rgba(167,139,250,0.3)' },
-    emerald: { bg: 'rgba(16,185,129,0.06)', border: 'rgba(16,185,129,0.1)', text: 'rgba(52,211,153,0.5)', icon: 'rgba(52,211,153,0.3)' },
-    cyan: { bg: 'rgba(6,182,212,0.06)', border: 'rgba(6,182,212,0.1)', text: 'rgba(34,211,238,0.5)', icon: 'rgba(34,211,238,0.3)' },
-    pink: { bg: 'rgba(236,72,153,0.06)', border: 'rgba(236,72,153,0.1)', text: 'rgba(244,114,182,0.5)', icon: 'rgba(244,114,182,0.3)' },
-  };
-  const c = colorMap[color] || colorMap.indigo;
-
-  return (
-    <motion.div
-      className="absolute hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-xl"
-      style={{ background: c.bg, borderColor: c.border }}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
-      transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: delay + position.delay || 0 }}
-    >
-      {Icon && <Icon className="text-xs" style={{ color: c.icon }} />}
-      <span className="text-xs font-medium" style={{ color: c.text }}>{value}</span>
-    </motion.div>
   );
 }
 

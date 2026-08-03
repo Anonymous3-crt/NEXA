@@ -1,5 +1,5 @@
-import { useRef, useCallback, useEffect, useState } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
 
 function SoftGlow() {
   return (
@@ -154,21 +154,21 @@ function NeuralLines() {
   );
 }
 
-function ParticleField() {
-  const particles = Array.from({ length: 40 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 2 + 1,
-    duration: Math.random() * 20 + 15,
-    delay: Math.random() * 10,
-    drift: (Math.random() - 0.5) * 20,
-    color: ['rgba(99,102,241,0.3)', 'rgba(139,92,246,0.2)', 'rgba(6,182,212,0.2)', 'rgba(168,85,247,0.15)'][Math.floor(Math.random() * 4)],
-  }));
+const PARTICLES = Array.from({ length: 40 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 2 + 1,
+  duration: Math.random() * 20 + 15,
+  delay: Math.random() * 10,
+  drift: (Math.random() - 0.5) * 20,
+  color: ['rgba(99,102,241,0.3)', 'rgba(139,92,246,0.2)', 'rgba(6,182,212,0.2)', 'rgba(168,85,247,0.15)'][Math.floor(Math.random() * 4)],
+}));
 
+function ParticleField() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden hidden lg:block">
-      {particles.map((p) => (
+      {PARTICLES.map((p) => (
         <motion.div
           key={p.id}
           className="absolute rounded-full"

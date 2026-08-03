@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  FiMessageCircle, FiUser, FiSend, FiCpu, FiPaperclip, FiPhone, FiVideo,
-  FiCalendar, FiFile, FiImage, FiMoreHorizontal, FiSearch, FiBell,
+  FiUser, FiSend, FiCpu, FiPaperclip, FiPhone, FiVideo,
+  FiCalendar, FiFile, FiMoreHorizontal, FiSearch, FiBell,
 } from 'react-icons/fi';
 
 const messages = [

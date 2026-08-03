@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 import { dbGet, dbRun } from '../config/db.js';
 import { generateToken, authMiddleware } from '../middleware/auth.js';
+import { sendVerificationCode, sendPasswordReset } from '../services/email.js';
 
 const router = Router();
 
@@ -36,7 +37,7 @@ router.post('/signup', async (req, res) => {
   const verificationCode = generateCode();
 
   await dbRun('INSERT INTO users (id, name, email, password_hash, initials, color, verification_code) VALUES (?,?,?,?,?,?,?)', [id, name, email, password_hash, initials, color, verificationCode]);
-  console.log(`[DEV] Verification code for ${email}: ${verificationCode}`);
+  await sendVerificationCode({ email, name, code: verificationCode });
 
   const token = generateToken(id);
   res.status(201).json({
@@ -73,7 +74,7 @@ router.post('/resend-verification', async (req, res) => {
 
   const code = generateCode();
   await dbRun('UPDATE users SET verification_code = ? WHERE id = ?', [code, user.id]);
-  console.log(`[DEV] Verification code for ${email}: ${code}`);
+  await sendVerificationCode({ email, name: user.name, code });
 
   res.json({ success: true, message: 'New code sent', devCode: devOnly(code) });
 });
@@ -89,7 +90,7 @@ router.post('/forgot-password', async (req, res) => {
 
   const resetToken = uuid();
   await dbRun('UPDATE users SET reset_token = ? WHERE id = ?', [resetToken, user.id]);
-  console.log(`[DEV] Password reset for ${email}: http://localhost:3001/reset-password?token=${resetToken}`);
+  await sendPasswordReset({ email, name: user.name, token: resetToken });
 
   res.json({ success: true, message: 'If that email exists, a reset link has been sent.', devToken: devOnly(resetToken) });
 });

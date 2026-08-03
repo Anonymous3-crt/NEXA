@@ -14,13 +14,13 @@ async function request(path, options = {}) {
     res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
   } catch (err) {
     console.error(`[API] Network error: ${path}`, err);
-    throw new Error('Network error. Please check your connection.');
+    throw new Error('Network error. Please check your connection.', { cause: err });
   }
 
   console.log(`[API] ${options.method || 'GET'} ${path} → ${res.status} ${res.statusText}`);
 
   const contentType = res.headers.get('content-type');
-  let body = null;
+  let body;
 
   if (contentType && contentType.includes('application/json')) {
     const text = await res.text();
@@ -31,8 +31,8 @@ async function request(path, options = {}) {
     try {
       body = JSON.parse(text);
     } catch (parseErr) {
-      console.error(`[API] Invalid JSON for ${path}:`, text);
-      throw new Error('Invalid server response. Please try again.');
+      console.error(`[API] Invalid JSON for ${path}:`, parseErr);
+      throw new Error('Invalid server response. Please try again.', { cause: parseErr });
     }
   } else {
     const text = await res.text();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiChevronDown, FiMessageCircle } from 'react-icons/fi';
+import { FiChevronDown } from 'react-icons/fi';
 import { faqData } from '../data/mockData';
 
 export default function FAQ() {

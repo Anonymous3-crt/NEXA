@@ -69,7 +69,7 @@ export async function seedDatabase() {
   ];
 
   for (const [convId, senderId, text, time] of messages) {
-    await dbRun('INSERT INTO messages VALUES (?,?,?,?,?)', [uuid(), convId, senderId, text, time]);
+    await dbRun('INSERT INTO messages (id, conversation_id, sender_id, text, created_at) VALUES (?,?,?,?,?)', [uuid(), convId, senderId, text, time]);
   }
 
   const notifications = [

@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { api, getStoredUser } from '../api';
 import { useToast } from '../components/ui/Toast';
@@ -14,7 +16,7 @@ export function DashboardProvider({ children }) {
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState({});
   const [notifications, setNotifications] = useState([]);
-  const [currentUser, setCurrentUser] = useState(getStoredUser());
+  const [currentUser] = useState(getStoredUser());
   const [theme, setTheme] = useState(() => localStorage.getItem('nexa_theme') || 'dark');
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -28,6 +30,9 @@ export function DashboardProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     loadConversations();
     loadNotifications();
     loadContacts();

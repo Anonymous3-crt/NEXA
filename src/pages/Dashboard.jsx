@@ -15,7 +15,6 @@ function DashboardInner() {
   const {
     currentUser, setSidebarOpen,
     setSettingsOpen, setProfileOpen,
-    notifOpen, setNotifOpen,
   } = useDashboard();
 
   return (
@@ -86,7 +85,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   useEffect(() => {
     if (!localStorage.getItem('nexa_token')) navigate('/login', { replace: true });
-  }, []);
+  }, [navigate]);
   return (
     <DashboardProvider>
       <motion.div

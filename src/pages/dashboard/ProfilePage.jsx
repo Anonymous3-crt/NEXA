@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiEdit2, FiMail, FiClock, FiCalendar, FiCamera, FiCheck, FiX } from 'react-icons/fi';
+import { FiEdit2, FiMail, FiClock, FiCalendar, FiCamera } from 'react-icons/fi';
 import DashboardSubLayout from '../../components/dashboard/DashboardSubLayout';
 import { useDashboard } from '../../contexts/DashboardContext';
 import { usePageTitle } from '../../hooks/usePageTitle';
