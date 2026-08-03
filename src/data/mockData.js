@@ -1,184 +1,361 @@
 import {
   FiMessageSquare, FiShield, FiUsers,
-  FiCamera, FiFolder, FiMonitor,
-  FiSlack, FiGitBranch, FiTerminal, FiCloud, FiDatabase, FiLock,
+  FiPhone, FiFolder, FiGitBranch, FiTrendingUp,
+  FiCode, FiBookOpen, FiPenTool, FiBriefcase, FiUserCheck,
 } from 'react-icons/fi';
 
 export const features = [
   {
+    id: 'conversations',
     icon: FiMessageSquare,
-    title: 'AI Conversations',
-    desc: 'Context-aware AI that understands nuance, remembers context, and delivers human-like responses in real-time.',
-    gradient: 'from-indigo-400 to-purple-500',
-    color: '#6366f1',
+    title: 'AI conversations',
+    desc: 'Context-aware chat that remembers the full thread, your tone, and your team’s context — so every answer lands.',
+    color: '#818cf8',
+    tint: 'rgba(99,102,241,0.10)',
+    span: 'lg:col-span-2',
+    visual: 'chat',
   },
   {
-    icon: FiCamera,
-    title: 'Voice & Video Calls',
-    desc: 'Crystal-clear HD voice and video calls with AI-powered noise cancellation and adaptive bitrate.',
-    gradient: 'from-purple-400 to-pink-500',
-    color: '#a855f7',
-  },
-  {
+    id: 'security',
     icon: FiShield,
-    title: 'Secure Messaging',
-    desc: 'End-to-end encrypted conversations with zero-knowledge architecture. Your privacy is our foundation.',
-    gradient: 'from-cyan-400 to-blue-500',
-    color: '#06b6d4',
+    title: 'Built on privacy',
+    desc: 'End-to-end encryption, zero data retention, and granular workspace permissions by default.',
+    color: '#34d399',
+    tint: 'rgba(16,185,129,0.08)',
+    span: '',
+    visual: 'lock',
   },
   {
+    id: 'voice',
+    icon: FiPhone,
+    title: 'Voice & video',
+    desc: 'Crystal-clear calls with AI noise cancellation and live transcription.',
+    color: '#22d3ee',
+    tint: 'rgba(6,182,212,0.08)',
+    span: '',
+    visual: 'voice',
+  },
+  {
+    id: 'groups',
     icon: FiUsers,
-    title: 'Group Chats',
-    desc: 'Create dynamic group conversations with threaded replies, mentions, and granular permission controls.',
-    gradient: 'from-indigo-400 to-cyan-500',
-    color: '#6366f1',
+    title: 'Team threads',
+    desc: 'Threaded replies, mentions, and permissions that scale from two people to two thousand.',
+    color: '#a78bfa',
+    tint: 'rgba(139,92,246,0.08)',
+    span: '',
+    visual: 'groups',
   },
   {
+    id: 'files',
     icon: FiFolder,
-    title: 'File Sharing',
-    desc: 'Share files up to 2GB with instant preview, collaborative annotations, and version history.',
-    gradient: 'from-purple-400 to-indigo-500',
-    color: '#8b5cf6',
+    title: 'Files that think',
+    desc: 'Drop in PDFs, decks, and spreadsheets. Nexa reads, indexes, and answers questions about them.',
+    color: '#f59e0b',
+    tint: 'rgba(245,158,11,0.07)',
+    span: '',
+    visual: 'files',
   },
   {
-    icon: FiMonitor,
-    title: 'Cross Platform',
-    desc: 'Seamless experience across web, desktop, and mobile with real-time sync and offline support.',
-    gradient: 'from-pink-400 to-purple-500',
-    color: '#ec4899',
+    id: 'workflow',
+    icon: FiGitBranch,
+    title: 'Workflow automation',
+    desc: 'Turn repeatable steps into automations. Summaries, drafts, and follow-ups happen without lifting a finger.',
+    color: '#f472b6',
+    tint: 'rgba(236,72,153,0.08)',
+    span: '',
+    visual: 'workflow',
+  },
+  {
+    id: 'analytics',
+    icon: FiTrendingUp,
+    title: 'Insights that compound',
+    desc: 'See where your team’s time goes. Weekly digests surface patterns, bottlenecks, and wins across every workspace.',
+    color: '#818cf8',
+    tint: 'rgba(99,102,241,0.07)',
+    span: 'lg:col-span-2',
+    visual: 'analytics',
   },
 ];
 
-export const testimonials = [
-  {
-    name: 'Sarah Chen',
-    role: 'Product Designer at Stripe',
-    initials: 'SC',
-    content: 'Nexa has completely transformed how our team collaborates. The AI understands context better than any tool I have ever used.',
-    rating: 5,
-    color: '#6366f1',
-  },
-  {
-    name: 'Marcus Rivera',
-    role: 'Founder & CEO, TechFlow',
-    initials: 'MR',
-    content: 'We replaced three different tools with Nexa. The custom personas feature alone saves our engineers hours every day.',
-    rating: 5,
-    color: '#8b5cf6',
-  },
-  {
-    name: 'Emily Nakamura',
-    role: 'Lead Engineer, Vercel',
-    initials: 'EN',
-    content: 'The speed is incredible. Real-time responses with zero lag. This is what AI chat should feel like.',
-    rating: 5,
-    color: '#06b6d4',
-  },
-  {
-    name: 'David Park',
-    role: 'CTO, InnovateLab',
-    initials: 'DP',
-    content: 'Security was our biggest concern, and Nexa exceeded every requirement. Enterprise-grade encryption out of the box.',
-    rating: 5,
-    color: '#6366f1',
-  },
+export const stats = [
+  { label: 'Conversations processed', value: 4200000, suffix: '+', note: 'demo' },
+  { label: 'Teams on Nexa', value: 2400, suffix: '+', note: 'demo' },
+  { label: 'Hours saved per week', value: 11, suffix: 'h', note: 'demo' },
+  { label: 'Uptime', value: 99.9, suffix: '%', note: 'demo' },
 ];
 
 export const howItWorks = [
   {
     step: 1,
-    title: 'Create your account',
-    desc: 'Sign up in seconds with your email or connect your existing workspace. No credit card required.',
+    title: 'Connect your workspace',
+    desc: 'Sign up in seconds, invite your team, and let Nexa index the docs, files, and conversations you already have.',
     gradient: 'from-indigo-400 to-purple-500',
   },
   {
     step: 2,
-    title: 'Connect with your team',
-    desc: 'Invite teammates, set up channels, and customize your workspace exactly how you like it.',
+    title: 'Ask, draft, automate',
+    desc: 'Chat, generate, and analyze in plain language. Nexa learns your tone and your team’s conventions as you go.',
     gradient: 'from-purple-400 to-pink-500',
   },
   {
     step: 3,
-    title: 'Start chatting instantly',
-    desc: 'Dive into intelligent conversations with AI-powered assistance, right out of the box.',
+    title: 'Scale without friction',
+    desc: 'Add teammates, connect tools, and let automations handle the busywork. Pricing grows with you, not against you.',
     gradient: 'from-cyan-400 to-blue-500',
   },
 ];
 
 export const faqData = [
   {
-    q: 'What makes Nexa different from other chat apps?',
-    a: 'Nexa combines cutting-edge AI with a premium user experience. Our context-aware engine, custom personas, and enterprise-grade security set us apart from conventional chat applications.',
+    q: 'What makes Nexa different from other AI chat tools?',
+    a: 'Most tools are one trick: chat, or code, or writing. Nexa is a single workspace where conversation, code, documents, and automation share one context engine — so an answer from Monday still makes sense on Friday, and your team never has to copy-paste between apps.',
   },
   {
     q: 'Is my data secure and private?',
-    a: 'Absolutely. We use end-to-end encryption for all messages and maintain a strict zero-data-retention policy. Your conversations are yours alone.',
+    a: 'Yes. Messages are encrypted in transit and at rest, we do not train models on your workspace data, and you can delete everything at any time. Enterprise workspaces get SSO, audit logs, and regional data residency.',
   },
   {
-    q: 'Can I use Nexa for team collaboration?',
-    a: 'Yes! Nexa supports shared workspaces, real-time collaboration, and thread sharing. Perfect for teams of any size.',
+    q: 'Can Nexa actually read my documents and files?',
+    a: 'It can. Drop in PDFs, Markdown, decks, or spreadsheets and Nexa indexes them so you can ask questions, get summaries, and cite sources — all inside the conversation.',
   },
   {
-    q: 'How many languages does Nexa support?',
-    a: 'Nexa supports over 50 languages with automatic detection. Whether you are chatting in English, Japanese, Arabic, or Spanish, Nexa has you covered.',
+    q: 'How is Nexa different from using several AI tools at once?',
+    a: 'Using several tools means losing context every time you switch. Nexa keeps one thread across chat, code, and documents, which saves the context-switching cost and the extra subscriptions.',
   },
   {
-    q: 'Is there a free tier available?',
-    a: 'Yes, we offer a generous free tier with core features. Premium plans unlock advanced capabilities including custom personas, priority support, and team features.',
+    q: 'Is there a free tier?',
+    a: 'Yes. The Starter plan is free forever with 1,000 messages a month, so you can try everything before paying. Pro adds unlimited messages, custom personas, and full history.',
   },
 ];
 
 export const plans = [
   {
     name: 'Starter',
-    price: 'Free',
+    priceMonthly: 0,
+    priceYearly: 0,
+    priceLabel: 'Free',
     period: 'forever',
-    features: ['1,000 messages/month', 'Basic AI chat', 'Single workspace', '24-hour message history'],
-    cta: 'Get Started',
+    description: 'For individuals trying Nexa on for size.',
+    features: [
+      '1,000 messages / month',
+      'AI chat & writing help',
+      'Single workspace',
+      '7-day message history',
+      'Community support',
+    ],
+    cta: 'Start for free',
     featured: false,
   },
   {
     name: 'Pro',
-    price: '$19',
-    period: '/month',
-    features: ['Unlimited messages', 'Advanced AI with custom personas', 'Unlimited workspaces', 'Full message history', 'Priority support'],
-    cta: 'Start Free Trial',
+    priceMonthly: 19,
+    priceYearly: 15,
+    priceLabel: '$',
+    period: '/ month',
+    description: 'For professionals and teams who live in Nexa.',
+    features: [
+      'Unlimited messages',
+      'Code generation & analysis',
+      'Document chat (100 files)',
+      'Unlimited workspaces',
+      'Custom AI personas',
+      'Priority support',
+    ],
+    cta: 'Start 14-day trial',
     featured: true,
   },
   {
     name: 'Enterprise',
-    price: '$49',
-    period: '/month',
-    features: ['Everything in Pro', 'Dedicated AI instance', 'SSO & SAML', 'Audit logs', '99.99% uptime SLA', 'Custom integrations'],
-    cta: 'Contact Sales',
+    priceMonthly: 49,
+    priceYearly: 39,
+    priceLabel: '$',
+    period: '/ user / month',
+    description: 'For organizations with security and scale needs.',
+    features: [
+      'Everything in Pro',
+      'SSO / SAML & audit logs',
+      'Dedicated AI instances',
+      'Regional data residency',
+      '99.99% uptime SLA',
+      'Onboarding & success team',
+    ],
+    cta: 'Talk to sales',
     featured: false,
+  },
+];
+
+export const comparison = [
+  { feature: 'One shared context across chat, code & docs', nexa: true, others: false },
+  { feature: 'Document analysis with source citations', nexa: true, others: false },
+  { feature: 'Custom AI personas for your team', nexa: true, others: 'partial' },
+  { feature: 'Unlimited message history on Pro', nexa: true, others: false },
+  { feature: 'Weekly team productivity insights', nexa: true, others: false },
+  { feature: 'Single subscription, single login', nexa: true, others: false },
+  { feature: 'Built-in collaboration (threads, mentions)', nexa: true, others: 'partial' },
+];
+
+export const showcaseTabs = [
+  {
+    id: 'chat',
+    label: 'Chat',
+    title: 'Conversations with real memory',
+    description:
+      'Nexa keeps full context across every thread. Ask a follow-up two weeks later and it still knows what you meant.',
+    bullets: ['Thread memory across sessions', 'Team tone & style that adapts', 'Instant replies, streaming output'],
+  },
+  {
+    id: 'code',
+    label: 'Code',
+    title: 'From prompt to production code',
+    description:
+      'Generate, explain, and refactor code with the repository context your team actually works with.',
+    bullets: ['Repo-aware suggestions', 'Explain & refactor in place', 'Safe, reviewable diffs'],
+  },
+  {
+    id: 'docs',
+    label: 'Docs',
+    title: 'Every document, instantly searchable',
+    description:
+      'Upload PDFs, decks, and spreadsheets. Ask questions and get answers with exact source citations.',
+    bullets: ['Answers with source citations', 'Summaries in seconds', 'Works across 20+ file formats'],
+  },
+  {
+    id: 'images',
+    label: 'Images',
+    title: 'Visuals from a sentence',
+    description:
+      'Generate, edit, and iterate on images directly inside a conversation — no separate design tool required.',
+    bullets: ['Generate from a prompt', 'Edit with natural language', 'Rendered in seconds'],
   },
 ];
 
 export const navLinks = [
   { label: 'Features', href: '#features' },
   { label: 'Showcase', href: '#showcase' },
-  { label: 'Testimonials', href: '#testimonials' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'How it works', href: '#how-it-works' },
   { label: 'Pricing', href: '#pricing' },
+  { label: 'Resources', href: '#faq' },
+];
+
+export const useCases = [
+  {
+    id: 'developers',
+    icon: FiCode,
+    title: 'Developers',
+    desc: 'Code-aware assistants that understand your repo, draft commits, and answer questions in full context.',
+    tags: ['Repo Q&A', 'Commit drafts', 'Docs as code'],
+    color: '#6366f1',
+    tint: 'rgba(99,102,241,0.10)',
+  },
+  {
+    id: 'students',
+    icon: FiBookOpen,
+    title: 'Students',
+    desc: 'Turn lectures, notes, and PDFs into clean study sets — with citations you can trust.',
+    tags: ['Lecture summaries', 'Quiz prep', 'Citations'],
+    color: '#10b981',
+    tint: 'rgba(16,185,129,0.08)',
+  },
+  {
+    id: 'creators',
+    icon: FiPenTool,
+    title: 'Creators',
+    desc: 'From raw idea to finished draft. Nexa keeps your tone, schedules posts, and tracks feedback.',
+    tags: ['Tone matching', 'Post drafts', 'Content calendar'],
+    color: '#ec4899',
+    tint: 'rgba(236,72,153,0.08)',
+  },
+  {
+    id: 'businesses',
+    icon: FiBriefcase,
+    title: 'Businesses',
+    desc: 'Standard operating procedures, meeting notes, and onboarding — automated and searchable.',
+    tags: ['SOPs', 'Meeting notes', 'Onboarding'],
+    color: '#f59e0b',
+    tint: 'rgba(245,158,11,0.08)',
+  },
+  {
+    id: 'professionals',
+    icon: FiUserCheck,
+    title: 'Professionals',
+    desc: 'Lawyers, consultants, accountants: query hundreds of documents in plain language.',
+    tags: ['Document search', 'Case briefs', 'Reports'],
+    color: '#06b6d4',
+    tint: 'rgba(6,182,212,0.08)',
+  },
+];
+
+export const testimonials = [
+  {
+    id: 't1',
+    quote:
+      'Nexa replaced four tools for us. Our writers go from idea to published draft in a single afternoon — the tone matching is uncanny.',
+    name: 'Maya Chen',
+    role: 'Head of Content, Lumen',
+    initials: 'MC',
+    color: '#6366f1',
+    stat: '3.2× faster publishing',
+  },
+  {
+    id: 't2',
+    quote:
+      'I stopped digging through Slack archives. Nexa answers “what did we decide in March?” before I finish typing the question.',
+    name: 'Jonas Weber',
+    role: 'Product Lead, Quantic',
+    initials: 'JW',
+    color: '#10b981',
+    stat: '11 hrs saved / week',
+  },
+  {
+    id: 't3',
+    quote:
+      'The voice agents are the sleeper hit. I dictate notes on the way home and they land in our docs, tagged and filed.',
+    name: 'Priya Raman',
+    role: 'Founder, Vantage Labs',
+    initials: 'PR',
+    color: '#ec4899',
+    stat: '9 hrs saved / week',
+  },
+  {
+    id: 't4',
+    quote:
+      'As a solo developer I live in the API. Shipping a workspace with search, agents, and file intelligence took a weekend.',
+    name: 'Tomás Duarte',
+    role: 'Indie Developer',
+    initials: 'TD',
+    color: '#f59e0b',
+    stat: '8 hrs saved / week',
+  },
+  {
+    id: 't5',
+    quote:
+      'Our onboarding went from a 40-page handbook nobody read to a conversation with a document that answers anything.',
+    name: 'Grace Liu',
+    role: 'HR Lead, Northwind',
+    initials: 'GL',
+    color: '#06b6d4',
+    stat: '60% faster onboarding',
+  },
+  {
+    id: 't6',
+    quote:
+      'I draft case briefs in plain English and Nexa turns them into precise, cited notes. My research time has halved.',
+    name: 'Daniel Okoro',
+    role: 'Legal Consultant',
+    initials: 'DO',
+    color: '#8b5cf6',
+    stat: '2× faster research',
+  },
 ];
 
 export const companies = [
-  { name: 'GitHub', symbol: 'GH' },
-  { name: 'Vercel', symbol: 'VC' },
-  { name: 'Figma', symbol: 'FG' },
-  { name: 'Stripe', symbol: 'ST' },
-  { name: 'Notion', symbol: 'NT' },
-  { name: 'Linear', symbol: 'LN' },
-];
-
-export const integrations = [
-  { icon: FiSlack, name: 'Slack', desc: 'Sync conversations and share threads directly to your channels.' },
-  { icon: FiGitBranch, name: 'GitHub', desc: 'Connect repositories and get AI-powered code reviews.' },
-  { icon: FiTerminal, name: 'VS Code', desc: 'Use Nexa directly inside your editor with our extension.' },
-  { icon: FiCloud, name: 'AWS', desc: 'Deploy custom AI agents on your own infrastructure.' },
-  { icon: FiDatabase, name: 'Supabase', desc: 'Store chat history and user data in your own database.' },
-  { icon: FiLock, name: 'Okta', desc: 'Enterprise SSO with SCIM provisioning and directory sync.' },
+  { name: 'Acme', symbol: 'A', color: '#a1a1aa' },
+  { name: 'Northwind', symbol: 'N', color: '#38bdf8' },
+  { name: 'Lumen', symbol: 'L', color: '#f472b6' },
+  { name: 'Quantic', symbol: 'Q', color: '#34d399' },
+  { name: 'Vantage', symbol: 'V', color: '#fbbf24' },
+  { name: 'Orbit', symbol: 'O', color: '#a78bfa' },
+  { name: 'Peakflow', symbol: 'P', color: '#f87171' },
 ];
 
 export const currentUser = {

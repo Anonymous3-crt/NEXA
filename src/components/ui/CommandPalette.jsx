@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiSearch, FiHome, FiLayout, FiInfo, FiShield, FiFileText, FiLogIn, FiUserPlus,
-  FiZap, FiStar, FiMessageSquare, FiHelpCircle, FiTag, FiLink, FiArrowUp, FiCornerDownLeft,
+  FiZap, FiMessageSquare, FiHelpCircle, FiTag, FiLink, FiArrowUp, FiArrowRight, FiCornerDownLeft,
+  FiBriefcase, FiStar,
 } from 'react-icons/fi';
 import { CommandPaletteContext, useCommandPalette } from './CommandPaletteContext';
 
@@ -20,9 +21,11 @@ const PAGES = [
 const SECTIONS = [
   { id: 'features', label: 'Features', keywords: 'capabilities ai tools', icon: FiZap, section: 'features' },
   { id: 'showcase', label: 'Product Showcase', keywords: 'demo preview product', icon: FiLayout, section: 'showcase' },
-  { id: 'testimonials', label: 'Testimonials', keywords: 'reviews users feedback', icon: FiStar, section: 'testimonials' },
-  { id: 'faq', label: 'FAQ', keywords: 'questions answers help', icon: FiHelpCircle, section: 'faq' },
+  { id: 'how', label: 'How it works', keywords: 'steps workflow getting started', icon: FiArrowRight, section: 'how-it-works' },
+  { id: 'cases', label: 'Use cases', keywords: 'developers students creators businesses', icon: FiBriefcase, section: 'use-cases' },
+  { id: 'reviews', label: 'Testimonials', keywords: 'reviews love quotes social proof', icon: FiStar, section: 'testimonials' },
   { id: 'pricing', label: 'Pricing', keywords: 'plans cost tiers price', icon: FiTag, section: 'pricing' },
+  { id: 'faq', label: 'FAQ', keywords: 'questions answers help resources', icon: FiHelpCircle, section: 'faq' },
 ];
 
 const ACTIONS = [

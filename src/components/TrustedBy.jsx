@@ -1,42 +1,29 @@
-import { motion } from 'framer-motion';
 import { companies } from '../data/mockData';
-
-const logoColors = ['#6366f1', '#8b5cf6', '#06b6d4', '#ec4899', '#f59e0b', '#10b981'];
 
 export default function TrustedBy() {
   return (
-    <section className="relative py-16 sm:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-center text-sm text-zinc-500 mb-10 tracking-wider uppercase font-medium"
-        >
-          Trusted by developers, startups and creators worldwide
-        </motion.p>
-        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
-          {companies.map((company, i) => (
-            <motion.div
-              key={company.name}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.4 }}
-              whileHover={{ scale: 1.05, opacity: 0.7 }}
-              className="flex items-center gap-2.5 select-none"
-            >
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold"
-                style={{ backgroundColor: logoColors[i % logoColors.length] + '20', color: logoColors[i % logoColors.length] }}
+    <section className="relative px-5 sm:px-8 py-16 border-y border-[var(--l-border)] bg-[var(--l-bg-alt)]/60">
+      <div className="max-w-6xl mx-auto">
+        <p className="reveal text-center text-xs tracking-[0.22em] uppercase text-[var(--l-faint)] mb-9">
+          Trusted by teams at
+        </p>
+        <div className="reveal marquee-mask">
+          <div className="marquee-track items-center">
+            {[...companies, ...companies].map((c, i) => (
+              <span
+                key={`${c.name}-${i}`}
+                className="flex items-center gap-2.5 text-[var(--l-muted)] opacity-70 hover:opacity-100 transition-opacity duration-300"
               >
-                {company.symbol}
-              </div>
-              <span className="text-lg font-semibold text-zinc-600 tracking-tight">
-                {company.name}
+                <span
+                  className="grid place-items-center w-7 h-7 rounded-lg border border-[var(--l-border-strong)] text-[11px] font-semibold"
+                  style={{ color: c.color, background: 'var(--l-surface)' }}
+                >
+                  {c.symbol}
+                </span>
+                <span className="font-display text-lg font-semibold tracking-tight">{c.name}</span>
               </span>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

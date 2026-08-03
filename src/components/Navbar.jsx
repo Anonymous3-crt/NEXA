@@ -1,71 +1,101 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiMessageCircle, FiArrowRight, FiSearch } from 'react-icons/fi';
+import { FiMenu, FiX, FiArrowRight, FiSearch, FiCommand, FiSun, FiMoon } from 'react-icons/fi';
 import { navLinks } from '../data/mockData';
 import { useCommandPalette } from './ui/CommandPaletteContext';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
-export default function Navbar() {
+function Logo({ onClick }) {
+  return (
+    <Link to="/" onClick={onClick} className="flex items-center gap-2.5 group" aria-label="Nexa home">
+      <span className="relative grid place-items-center w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 transition-transform duration-300 group-hover:scale-105">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M12 3C7 3 3 6.6 3 11c0 2.4 1.2 4.6 3.1 6.1-.1 1.1.3 2.4 1.6 3.1.7.4 1.5.3 2-.1.5-.4.4-1.2.1-1.7-.2-.3-.4-.8-.3-1.3l1.9.6c.5.2 1.1.3 1.6.3 5 0 9-3.6 9-8s-4-7-9-7Zm-2.5 9.5a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Zm5 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Zm-2.5-3.5a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5Z"
+            fill="#fff"
+          />
+        </svg>
+      </span>
+      <span className="font-display text-2xl font-semibold tracking-tight text-[var(--l-text)]">
+        Nexa
+      </span>
+    </Link>
+  );
+}
+
+function ThemeToggle({ theme, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      className="relative grid place-items-center w-9 h-9 rounded-full border border-[var(--l-border)] text-[var(--l-muted)] hover:text-[var(--l-text)] hover:border-[var(--l-border-strong)] transition-all duration-300"
+    >
+      <span
+        className="absolute inset-0 rounded-full grid place-items-center transition-opacity duration-300"
+        style={{ opacity: theme === 'light' ? 1 : 0, transform: theme === 'light' ? 'rotate(0)' : 'rotate(90deg)' }}
+      >
+        <FiSun size={15} aria-hidden="true" />
+      </span>
+      <span
+        className="absolute inset-0 rounded-full grid place-items-center transition-opacity duration-300"
+        style={{ opacity: theme === 'dark' ? 1 : 0, transform: theme === 'dark' ? 'rotate(0)' : 'rotate(-90deg)' }}
+      >
+        <FiMoon size={15} aria-hidden="true" />
+      </span>
+    </button>
+  );
+}
+
+export default function Navbar({ theme, onToggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const { setOpen } = useCommandPalette();
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 40);
-    };
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
+    const sections = navLinks
+      .map((l) => document.getElementById(l.href.replace('#', '')))
+      .filter(Boolean);
+    if (!sections.length) return;
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length === 0) return;
+        if (!visible.length) return;
         const top = visible.reduce((a, b) =>
-          a.boundingClientRect.top < b.boundingClientRect.top ? a : b
+          a.boundingClientRect.top < b.boundingClientRect.top ? a : b,
         );
         setActiveSection(top.target.id);
       },
-      { rootMargin: '-15% 0px -55% 0px', threshold: 0 }
+      { rootMargin: '-15% 0px -60% 0px', threshold: 0 },
     );
-    for (const link of navLinks) {
-      const el = document.getElementById(link.href.replace('#', ''));
-      if (el) observer.observe(el);
-    }
+    sections.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <motion.nav
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? 'bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/[0.05] shadow-lg shadow-black/20'
-          : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: -5 }}
-              className="w-9 h-9 rounded-xl gradient-bg flex items-center justify-center shadow-lg transition-transform"
-            >
-              <FiMessageCircle className="text-white text-lg" />
-            </motion.div>
-            <span className="text-xl font-bold text-white tracking-tight">
-              Nexa
-            </span>
-          </Link>
+  const closeMobile = () => setMobileOpen(false);
 
-          <div className="hidden md:flex items-center gap-1" role="navigation" aria-label="Main navigation">
+  return (
+    <header className="fixed top-0 inset-x-0 z-50 px-4 sm:px-6 pt-3 sm:pt-4">
+      <nav
+        aria-label="Main navigation"
+        className={`glass-nav mx-auto max-w-6xl rounded-full px-4 sm:px-5 ${
+          scrolled ? '' : 'bg-transparent !shadow-none !backdrop-blur-none'
+        }`}
+        style={!scrolled ? { background: 'transparent', borderColor: 'transparent' } : undefined}
+      >
+        <div className="flex items-center justify-between h-14 sm:h-16">
+          <Logo />
+
+          <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
               const sectionId = link.href.replace('#', '');
               const isActive = activeSection === sectionId;
@@ -74,136 +104,101 @@ export default function Navbar() {
                   key={link.label}
                   href={link.href}
                   aria-current={isActive ? 'true' : undefined}
-                  className={`px-4 py-2 text-sm rounded-xl transition-all duration-300 ${
+                  className={`relative px-3.5 py-2 text-sm rounded-full transition-colors duration-300 ${
                     isActive
-                      ? 'text-indigo-300 font-medium'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
+                      ? 'text-[var(--l-text)] font-medium'
+                      : 'text-[var(--l-muted)] hover:text-[var(--l-text)] hover:bg-[var(--l-surface-2)]'
                   }`}
                 >
-                  {link.label}
+                  <span className="relative">{link.label}</span>
                 </a>
               );
             })}
-            <div className="flex items-center gap-2 ml-4 pl-4 border-l border-white/[0.06]">
-              <span className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/[0.06] border border-emerald-500/10">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-glow" />
-                <span className="text-[10px] text-emerald-400 font-medium">All systems live</span>
-              </span>
-              <button
-                onClick={() => setOpen(true)}
-                className="hidden md:flex items-center gap-2 px-3 py-2 text-sm text-zinc-400 hover:text-white rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-indigo-500/25 transition-all duration-300"
-                aria-label="Open search"
-              >
-                <FiSearch size={14} />
-                <span className="text-zinc-500">Search</span>
-                <kbd className="px-1.5 py-0.5 rounded-md bg-white/[0.06] text-[10px] text-zinc-500 font-mono">
-                  {isMac ? '⌘K' : 'Ctrl K'}
-                </kbd>
-              </button>
-              <Link
-                to="/login"
-                className="px-4 py-2 text-sm text-zinc-400 hover:text-white rounded-xl transition-all duration-300 hover:bg-white/[0.05]"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/signup"
-                className="group relative px-5 py-2.5 rounded-xl gradient-bg text-white text-sm font-semibold shadow-lg glow-indigo flex items-center gap-2 transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95"
-              >
-                Get Started
-                <FiArrowRight className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-              </Link>
-            </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-2.5">
             <button
+              type="button"
               onClick={() => setOpen(true)}
-              className="md:hidden p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/[0.05] transition-all"
-              aria-label="Open search"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--l-muted)] hover:text-[var(--l-text)] rounded-full border border-[var(--l-border)] bg-[var(--l-glass)] hover:border-[var(--l-border-strong)] transition-all duration-300"
+              aria-label="Open command palette"
+            >
+              <FiSearch size={14} />
+              <span className="hidden xl:inline">Search</span>
+              <kbd className="hidden xl:flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--l-surface-2)] text-[10px] text-[var(--l-faint)] font-mono">
+                <FiCommand size={9} aria-hidden="true" />
+                {isMac ? 'K' : 'Ctrl K'}
+              </kbd>
+            </button>
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            <Link
+              to="/login"
+              className="px-3.5 py-2 text-sm text-[var(--l-muted)] hover:text-[var(--l-text)] rounded-full transition-colors duration-300"
+            >
+              Log in
+            </Link>
+            <Link to="/signup" className="btn-primary !py-2 group">
+              Get Started
+              <FiArrowRight
+                size={14}
+                className="transition-transform duration-300 group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+              <span className="btn-shine" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-1.5 lg:hidden">
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="p-2 text-[var(--l-muted)] hover:text-[var(--l-text)] rounded-lg transition-colors"
+              aria-label="Open command palette"
             >
               <FiSearch size={18} />
             </button>
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden relative z-50 p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/[0.05] transition-all"
-              aria-label="Toggle menu"
+              type="button"
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-nav-menu"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              className="p-2 text-[var(--l-muted)] hover:text-[var(--l-text)] rounded-lg transition-colors"
             >
-              {mobileOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+              {mobileOpen ? <FiX size={20} /> : <FiMenu size={20} />}
             </button>
           </div>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 md:hidden"
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute right-0 top-0 bottom-0 w-72 bg-[#0a0a0f]/95 backdrop-blur-2xl border-l border-white/[0.06] shadow-2xl"
-            >
-              <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
-                <Link to="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                  <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
-                    <FiMessageCircle className="text-white text-sm" />
-                  </div>
-                  <span className="text-lg font-bold text-white">Nexa</span>
-                </Link>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-white/[0.05] transition-all"
-                >
-                  <FiX size={20} />
-                </button>
-              </div>
-              <div className="p-4 space-y-1">
+        <div id="mobile-nav-menu" className={`mobile-menu lg:hidden ${mobileOpen ? 'open' : ''}`}>
+          <div>
+            <div className="pt-2 pb-4 border-t border-[var(--l-border)]">
+              <div className="flex flex-col gap-1">
                 {navLinks.map((link) => (
                   <a
                     key={link.label}
                     href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-4 py-3 text-sm text-zinc-400 hover:text-white rounded-xl hover:bg-white/[0.05] transition-all"
+                    onClick={closeMobile}
+                    className="px-3 py-2.5 text-sm text-[var(--l-muted)] hover:text-[var(--l-text)] rounded-lg hover:bg-[var(--l-surface-2)] transition-colors"
                   >
                     {link.label}
                   </a>
                 ))}
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/[0.06] space-y-2">
-                <Link
-                  to="/signup"
-                  onClick={() => setMobileOpen(false)}
-                  className="block w-full px-4 py-3 text-sm font-semibold text-center text-white rounded-xl gradient-bg"
-                >
+              <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-[var(--l-border)]">
+                <Link to="/signup" onClick={closeMobile} className="btn-primary w-full">
                   Get Started Free
+                  <span className="btn-shine" aria-hidden="true" />
                 </Link>
-                <Link
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="block w-full px-4 py-3 text-sm text-center text-zinc-400 rounded-xl glass hover:bg-white/[0.06] transition-all"
-                >
+                <Link to="/login" onClick={closeMobile} className="btn-secondary w-full">
                   Log in
                 </Link>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.nav>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
   );
 }
